@@ -13,3 +13,22 @@ Aplicación para la gestión de tutorías entre estudiantes y tutores (profesore
 
 ```bash
 git clone https://github.com/tu-usuario/nombre-del-repositorio.git
+```
+
+2. **Instalar paquetes del backend**
+
+Estando en la carpeta raiz ejecutar:
+
+```bash
+cd backend
+npm install
+```
+
+3. **Instalar paquetes del frontend**
+
+Volver al directorio raiz y ejecutar:
+
+```bash
+cd frontend
+npm install
+```
