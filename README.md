@@ -32,3 +32,29 @@ Volver al directorio raiz y ejecutar:
 cd frontend
 npm install
 ```
+
+### 🧪 Ejecución y prueba del prototipo
+
+1. **Iniciar el backend**
+
+Estando en la carpeta raiz ejecutar:
+
+```bash
+cd backend
+node server.js
+```
+
+2. **Iniciar el frontend**
+
+Volver al directorio raiz y ejecutar:
+
+```bash
+cd frontend
+npm run dev
+```
+
+3. **Abre tu navegador y ejecuta**
+
+```bash
+http://localhost:5173
+```
