@@ -1,5 +1,18 @@
 # mentoro
 Aplicación para la gestión de tutorías entre estudiantes y tutores (profesores o estudiantes capacitados). Esta app permite registrar usuarios, asignar tutorías y facilitar el proceso de aprendizaje.
+
+## 🖼️ Imagen representativa del proyecto
+
+![Logo de Mentoro](ruta/del/logo.png)
+
+## ✨ Funcionalidades principals
+
+(ejemplos)
+
+- Registro de usuarios (estudiantes y tutores).
+- Búsqueda y asignación de tutorías.
+- Gestión de historial de tutorías y sesiones agendadas.
+
 ## 🚀 Clonar y ejecutar el proyecto localmente
 
 ### Requisitos previos
