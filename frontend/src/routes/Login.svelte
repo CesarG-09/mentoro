@@ -1,36 +1,111 @@
- <script>
-  </script>
+<script>
+  import { onMount } from 'svelte';
+  import { navigate } from 'svelte-navigator';
+  let correo_utp  = '';
+  let clave = '';
+  let error = '';
+  let cargando = false;
 
+  async function login() {
+    error = '';
+    cargando = true;
+
+    try {
+      const res = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ correo_utp, clave })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+
+        const tipo = data.usuario.tipo_usuario;
+        if (tipo === 'estudiante') {
+          navigate('/estudiante/inicio');
+        } else if (tipo === 'profesor') {
+          //navigate('/profesor/inicio');
+        } else {
+          error = 'Tipo de usuario desconocido';
+          console.log(error);
+        }
+      } else {
+        error = data.error || data.mensaje || 'Error en login';
+      }
+    } catch (e) {
+      error = "Error al conectar con el servidor";
+      console.log(error);
+    } finally {
+      cargando = false;
+    }
+  }
+</script>
 
 <div class="loginbox">
   <div class="imagen1">
     <img src="/mentoro_logo.png" alt="logo de imagen" class="imagenlogo">
   </div>
   <div class="titulo1">
-    <h1 class="titulocentreado"> Iniciar Sesión </h1>
+    <h1 class="titulocentreado" > Iniciar Sesión </h1>
   </div>
-  <form>
+  <form on:submit|preventDefault={login}>
     <div class="correo">
-      <label>Correo institucional</label>
-      <input type="email"/>
+      <label for=email>Correo institucional</label>
+      <input type="email" id=email bind:value={correo_utp} required />
     </div>
 
     <div class="contrasena">
-      <label>Contraseña</label>
-      <input type="password"/>
+      <label for=password>Contraseña</label>
+      <input type="password" id=password bind:value={clave} required />
     </div>
     
-    <button type="submit">Ingresar</button>
+    <button type="submit" disabled={cargando}>
+      {#if cargando}
+        Ingresando...
+      {:else}
+        Ingresar
+      {/if}
+    </button>
   </form>
-
   <p>¿No tienes cuenta? <a href="#/registro"><strong>Regístrate aquí</strong></a></p>  
 </div>
+
+{#if cargando}
+  <p style="text-align: center; margin-top: 10px;">Validando credenciales...</p>
+{/if}
+
+{#if error}
+  <p style="color: red; text-align: center;">{error}</p>
+{/if}
+
+{#if cargando}
+  <div class="spinner"></div>
+{/if}
+
 
 <style>
   :global(body) {
     background-color: #F2EEE6;
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
+  }
+
+  .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #1E1E2F;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 0.8s linear infinite;
+    margin: 10px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   .loginbox {
