@@ -12,28 +12,28 @@
     <form>
 
         <div class="texto_titulo">
-            <label>Cédula</label>
-            <input type="text">
+            <label for=cedula>Cédula</label>
+            <input type="text" id=cedula>
         </div>
 
         <div class="texto_titulo">
-            <label>Nombre</label>
-            <input type="text">
+            <label for=nombre>Nombre</label>
+            <input type="text" id=nombre>
         </div>
 
         <div class="texto_titulo">
-            <label>Apellido</label>
-            <input type="text">
+            <label for=apellido>Apellido</label>
+            <input type="text" id=apellido>
         </div>
 
         <div class="texto_titulo">
-            <label>Correo institucional</label>
-            <input type="email">
+            <label for=correo>Correo institucional</label>
+            <input type="email" id=correo>
         </div>
 
         <div class="texto_titulo">
-            <label>Fecha de nacimiento</label>
-            <input type="date">
+            <label for=nacimiento>Fecha de nacimiento</label>
+            <input type="date" id=nacimiento>
         </div>
 
         <div class="texto_titulo">
