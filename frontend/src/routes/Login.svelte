@@ -70,7 +70,7 @@
       {/if}
     </button>
   </form>
-  <p>¿No tienes cuenta? <a href="#/registro"><strong>Regístrate aquí</strong></a></p>  
+  <p>¿No tienes cuenta? <a href="/registro"><strong>Regístrate aquí</strong></a></p>  
 </div>
 
 {#if cargando}
