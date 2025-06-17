@@ -7,6 +7,6 @@
 
 <Router>
   <Route path="/login" component={Login} />
-  <Route path="/registro" component={Registro}/>
+  <Route path="/registro" component={Registro} />
   <Route path="/estudiante/inicio" component={EstudianteInicio} />
 </Router>
