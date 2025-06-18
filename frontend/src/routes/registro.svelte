@@ -1,4 +1,5 @@
 <script>
+    let tipo = '';
 
 </script>
 
@@ -12,13 +13,8 @@
     <form>
 
         <div class="texto_titulo">
-            <label for=cedula>Cédula</label>
-            <input type="text" id=cedula>
-        </div>
-
-        <div class="texto_titulo">
-            <label for=nombre>Nombre</label>
-            <input type="text" id=nombre>
+            <label>Nombre</label>
+            <input type="text">
         </div>
 
         <div class="texto_titulo">
@@ -37,35 +33,38 @@
         </div>
 
         <div class="texto_titulo">
-            <label>Facultad</label>
-            <select>
-                <option value="" disabled selected>Seleccione...</option>
-                <option value="estudiante">Ex. 1</option>
-                <option value="tutor">Ex. 2</option>
-                <option value="estudiante">Ex. 3</option>
-                <option value="tutor">Ex. 4</option>
-            </select>
-        </div>
-
-        <div class= "texto_titulo">
-            <label>Carrera</label>
-            <select>
-                <option value="" disabled selected>Seleccione...</option>
-                <option value="estudiante">Ex. 1</option>
-                <option value="tutor">Ex. 2</option>
-                <option value="estudiante">Ex. 3</option>
-                <option value="tutor">Ex. 4</option>
-            </select>
-        </div>
-
-        <div class="texto_titulo">
             <label>Tipo de usuario</label>
-            <select>
+            <select bind:value={tipo} required>
                 <option value="" disabled selected>Seleccione...</option>
                 <option value="estudiante">Estudiante</option>
                 <option value="tutor">Tutor</option>
             </select>
         </div>
+
+        {#if tipo === 'estudiante'}
+            <h3>Datos del Estudiante</h3>
+            <div class="texto_titulo">
+                <label>Facultad</label>
+                <select>
+                    <option value="" disabled selected>Seleccione...</option>
+                    <option value="fac1">Ex. 1</option>
+                    <option value="fac2">Ex. 2</option>
+                    <option value="fac3">Ex. 3</option>
+                    <option value="fac4">Ex. 4</option>
+                </select>
+            </div>
+
+            <div class= "texto_titulo">
+                <label>Carrera</label>
+                <select>
+                    <option value="" disabled selected>Seleccione...</option>
+                    <option value="Carrera1">Ex. 1</option>
+                    <option value="Carrera2">Ex. 2</option>
+                    <option value="Carrera3">Ex. 3</option>
+                    <option value="Carrera4">Ex. 4</option>
+                </select>
+            </div>
+        {/if}
 
         <button type="submit">Registrarse</button>
     </form>
@@ -123,6 +122,7 @@
 
   button {
     background-color: #1E1E2F;
+    margin-top: 10px;
     color: #F2EEE6;
     border: none;
     padding: 0.6rem;
