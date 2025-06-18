@@ -13,8 +13,8 @@
     <form>
 
         <div class="texto_titulo">
-            <label>Nombre</label>
-            <input type="text">
+            <label for=name>Nombre</label>
+            <input type="text" id=name>
         </div>
 
         <div class="texto_titulo">
@@ -33,8 +33,8 @@
         </div>
 
         <div class="texto_titulo">
-            <label>Tipo de usuario</label>
-            <select bind:value={tipo} required>
+            <label for=userType>Tipo de usuario</label>
+            <select bind:value={tipo} id=userType required>
                 <option value="" disabled selected>Seleccione...</option>
                 <option value="estudiante">Estudiante</option>
                 <option value="tutor">Tutor</option>
@@ -44,8 +44,8 @@
         {#if tipo === 'estudiante'}
             <h3>Datos del Estudiante</h3>
             <div class="texto_titulo">
-                <label>Facultad</label>
-                <select>
+                <label for=faculty>Facultad</label>
+                <select id=faculty>
                     <option value="" disabled selected>Seleccione...</option>
                     <option value="fac1">Ex. 1</option>
                     <option value="fac2">Ex. 2</option>
@@ -55,8 +55,8 @@
             </div>
 
             <div class= "texto_titulo">
-                <label>Carrera</label>
-                <select>
+                <label for=carreer>Carrera</label>
+                <select id=carreer>
                     <option value="" disabled selected>Seleccione...</option>
                     <option value="Carrera1">Ex. 1</option>
                     <option value="Carrera2">Ex. 2</option>
