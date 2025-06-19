@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { registrarEstudiante, buscarUsuario } = require('../models/usuarioModel');
+const { registrarEstudiante, buscarUsuario, listarFacultades, listarCarreras } = require('../models/usuarioModel');
 
 const registroEstudiante = async (req, res) => {
   try {
@@ -81,7 +81,49 @@ const login = async (req, res) => {
   }
 };
 
+const listaFacultades = async (_req, res) => {
+	try {
+		const resultado = await listarFacultades()
+
+		if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontraron facultades' });
+		}
+
+		return res.status(200).json({
+			mensaje: 'Facultades obtenidas exitosamente',
+			facultades: resultado
+		});
+	} catch (error) {
+		console.error('Error al obtener facultades:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+	}
+};
+
+const listaCarreras = async (req, res) => {
+  try{
+    const facultad = req.query.facultad;
+    if (!facultad) {
+      return res.status(400).json({ error: 'La facultad es requerida' });
+    }
+
+    const resultado = await listarCarreras(facultad);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontraron carreras' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Carreras obtenidas exitosamente',
+			carreras: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener carreras:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+};
+
 module.exports = {
   registroEstudiante,
-  login
+  login,
+  listaFacultades,
+  listaCarreras
 };
