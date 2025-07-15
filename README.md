@@ -5,7 +5,7 @@ Aplicación para la gestión de tutorías entre estudiantes y tutores (profesore
 
 <img src="frontend/public/mentoro_logo.jpg" alt="Logo de Mentoro" width="200"/>
 
-## ✨ Funcionalidades principals
+## ✨ Funcionalidades principales
 
 (ejemplos)
 

@@ -9,7 +9,7 @@ const verificarToken = (req, res, next) => {
     jwt.verify(token, process.env.JWT_SECRET, (err, usuario) => {
         if (err) return res.status(403).json({ mensaje: 'Token inválido' });
 
-        req.usuario = usuario; // ahora las rutas pueden saber quién hizo la petición
+        req.usuario = usuario;
         next();
     });
 };

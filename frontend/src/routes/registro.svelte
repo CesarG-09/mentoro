@@ -1,5 +1,17 @@
 <script>
-  let tipo = '';
+  let facultades = [];
+  let carreras = [];
+  let id_facultad = '';
+  let id_carrera = '';
+
+  let usuario = '';
+  let clave = '123456';
+  let tipo_usuario = '';
+  let nombre = '';
+  let apellido = '';
+  let correo_utp = '';
+  let fe_nacimiento = '';
+  
   let password = '';
   let confirmPassword = '';
   let materiaInput = '';
@@ -83,6 +95,66 @@
   // Elimina materia de la lista si el usuario quiere
   function eliminarMateria(materia) {
     materias = materias.filter(m => m !== materia);
+    
+     function registrar() {
+    if (tipo_usuario === 'estudiante') {
+      regirtrarEstudiante();
+    } else if (tipo_usuario === 'tutor') {
+      registrarTutor();
+    } else {
+      alert('Debes seleccionar un tipo de usuario');
+    }
+  }
+
+  async function regirtrarEstudiante() {
+    usuario = correo_utp.split('@')[0];
+
+    console.log({datos:{
+      usuario: usuario,
+      clave: clave,
+      tipo_usuario: tipo_usuario,
+      nombre: nombre,
+      apellido: apellido,
+      correo_utp: correo_utp,
+      fe_nacimiento: fe_nacimiento,
+      id_carrera: id_carrera
+    }
+    });
+
+    /*const res = await fetch('http://localhost:3001/api/registro-estudiante', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ usuario, clave, tipo_usuario, nombre, apellido, correo_utp, fe_nacimiento, id_carrera })
+    });*/
+  }
+
+  async function registrarTutor() {
+    console.log("Registro de tutor");
+  }
+
+  async function getFacultades() {
+    if (tipo_usuario === 'estudiante') {
+      try {
+        const res = await fetch('http://localhost:3001/api/facultades');
+        if (!res.ok) throw new Error('Error al obtener facultades');
+        const data = await res.json();
+        facultades = data.facultades;
+      } catch (err) {
+        console.error('Error en la API:', err);
+      }
+    }
+  }
+
+  async function getCarreras() {
+    try {
+      const facultadObj = facultades.find(f => f.id_facultad == id_facultad);
+      const res = await fetch(`http://localhost:3001/api/carreras?facultad=${encodeURIComponent(facultadObj.de_facultad)}`);
+      if (!res.ok) throw new Error('Error al obtener carreras');
+      const data = await res.json();
+      carreras = data.carreras;
+    } catch (err) {
+      console.error('Error en la API:', err);
+    }
   }
 </script>
 
@@ -94,26 +166,26 @@
     <div class="Registro">
         <h1>Registro</h1>
     </div>
-    <form>
+    <form on:submit|preventDefault={registrar}>
 
         <div class="texto_titulo">
-            <label>Nombre</label>
-            <input type="text">
+            <label for=name>Nombre</label>
+            <input type="text" id=name bind:value={nombre}>
         </div>
 
         <div class="texto_titulo">
-            <label>Apellido</label>
-            <input type="text">
+            <label for=apellido>Apellido</label>
+            <input type="text" id=apellido bind:value={apellido}>
         </div>
 
         <div class="texto_titulo">
-            <label>Correo institucional</label>
-            <input type="email">
+            <label for=correo>Correo institucional</label>
+            <input type="email" id=correo bind:value={correo_utp}>
         </div>
 
         <div class="texto_titulo">
-            <label>Fecha de nacimiento</label>
-            <input type="date">
+            <label for=nacimiento>Fecha de nacimiento</label>
+            <input type="date" id=nacimiento bind:value={fe_nacimiento}>
         </div>
 
         <div class="texto_titulo">
@@ -136,8 +208,8 @@
         </div>
 
         <div class="texto_titulo">
-            <label>Tipo de usuario</label>
-            <select bind:value={tipo} required>
+            <label for=userType>Tipo de usuario</label>
+            <select bind:value={tipo_usuario} on:change={getFacultades} id=userType required>
                 <option value="" disabled selected>Seleccione...</option>
                 <option value="estudiante">Estudiante</option>
                 <option value="tutor">Tutor</option>
@@ -213,30 +285,27 @@
           </div>
         {/if}
 
-        {#if tipo === 'estudiante'}
-            <div class="texto_titulo">
-                <label>Facultad</label>
-                <select>
-                    <option value="" disabled selected>Seleccione...</option>
-                    <option value="fac1">Ex. 1</option>
-                    <option value="fac2">Ex. 2</option>
-                    <option value="fac3">Ex. 3</option>
-                    <option value="fac4">Ex. 4</option>
-                </select>
-            </div>
-
-            <div class= "texto_titulo">
-                <label>Carrera</label>
-                <select>
-                    <option value="" disabled selected>Seleccione...</option>
-                    <option value="Carrera1">Ex. 1</option>
-                    <option value="Carrera2">Ex. 2</option>
-                    <option value="Carrera3">Ex. 3</option>
-                    <option value="Carrera4">Ex. 4</option>
-                </select>
-            </div>
+        {#if tipo_usuario === 'estudiante'}
+          <h3>Datos del Estudiante</h3>
+          <div class="texto_titulo">
+              <label for=faculty>Facultad</label>
+              <select id=faculty bind:value={id_facultad} on:change={getCarreras}>
+                  <option value="" disabled selected>Seleccione...</option>
+                  {#each facultades as facultad}
+                    <option value={facultad.id_facultad}>{facultad.de_facultad}</option>
+                  {/each}
+              </select>
+          </div>
+          <div class= "texto_titulo">
+              <label for=carreer>Carrera</label>
+              <select id=carreer bind:value={id_carrera}>
+                  <option value="" disabled selected>Seleccione...</option>
+                  {#each carreras as carrera}
+                    <option value={carrera.id_carrera}>{carrera.de_carrera}</option>
+                  {/each}
+              </select>
+          </div>
         {/if}
-
         <button type="submit">Registrarse</button>
     </form>
 </div>
