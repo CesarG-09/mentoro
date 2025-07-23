@@ -1,84 +1,39 @@
-<!-- FALTA MODIFICAR ANCHO DE LA PANTALLA -->
-
 <script>
-  import { goto } from '$app/navigation';
-
-  let busqueda = '';
-
-  let tutores = [
-    {
-      nombre: 'Alexander Acosta',
-      materias: ['Matemática', 'Química', 'Ecuaciones'],
-      calificacion: 5,
-      slug: 'alexander-acosta'
-    },
-    {
-      nombre: 'Anabel Castillo',
-      materias: ['Inglés'],
-      calificacion: 4,
-      slug: 'anabel-castillo'
-    },
-    {
-      nombre: 'Carlos Gómez',
-      materias: ['Ecuaciones', 'Matemática Superior'],
-      calificacion: 3,
-      slug: 'carlos-gomez'
-    },
-    {
-      nombre: 'Camila Méndez',
-      materias: ['Cálculo I', 'Cálculo II', 'Cálculo III'],
-      calificacion: 5,
-      slug: 'camila-mendez'
-    }
+  let estudiantes = [
+    { nombre: "Ana González", facultad: "FISC", correo: "ana.gonzalez@utp.ac.pa", horas: 6 },
+    { nombre: "Carolina Gómez", facultad: "FII", correo: "carolina.gomez@utp.ac.pa", horas: 4 },
+    { nombre: "Carlos Gómez", facultad: "FIM", correo: "carlos.gomez@utp.ac.pa", horas: 9 },
+    { nombre: "Camila Mendez", facultad: "FISC", correo: "camila.mendez@utp.ac.pa", horas: 2 }
   ];
-
-  $: tutoresFiltrados = tutores.filter(t =>
-    t.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    t.materias.some(m => m.toLowerCase().includes(busqueda.toLowerCase()))
-  );
-
-  function verTutor(slug) {
-    goto(`/administrador/estudiantes/${slug}`);
-  }
 </script>
 
-<div class="dashboard">
-  <!-- Encabezado -->
+<div class="contenido">
   <div class="header">
-    <div class="left">
-      <h2>Estudiantes</h2>
-    </div>
+    <h2>Estudiantes</h2>
     <div class="logo-container">
       <img src="/mentoro_logo.png" alt="logo de imagen" class="imagenlogo" />
     </div>
   </div>
 
-  <!-- Buscador -->
-  <div class="search-container">
-    <input type="text" placeholder="Buscar Tutores" bind:value={busqueda} />
-  </div>
+  <input class="buscador" type="text" placeholder="Buscar Estudiantes" />
 
-  <!-- Tabla -->
-  <div class="table-header">
-    <span><strong>Nombre</strong></span>
-    <span><strong>Materias</strong></span>
-    <span><strong>Calificación</strong></span>
-  </div>
+  <div class="tabla">
+    <div class="fila encabezado">
+      <div>Nombre</div>
+      <div>Facultad</div>
+      <div>Correo</div>
+      <div>Tutoría Recibidas</div>
+    </div>
 
-  {#each tutoresFiltrados as tutor}
-    <button type="button" class="tutor-card clickable" on:click={() => verTutor(tutor.slug)}>
-      <span>{tutor.nombre}</span>
-      <span>{tutor.materias.join(', ')}</span>
-      <span>
-        {#each Array(tutor.calificacion) as _}
-          ⭐
-        {/each}
-        {#each Array(5 - tutor.calificacion) as _}
-          ☆
-        {/each}
-      </span>
-    </button>
-  {/each}
+    {#each estudiantes as estudiante}
+      <div class="fila">
+        <div>{estudiante.nombre}</div>
+        <div>{estudiante.facultad}</div>
+        <div>{estudiante.correo}</div>
+        <div>{estudiante.horas}</div>
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -88,71 +43,55 @@
     background-color: #F2EEE6;
   }
 
-  .tutor-card {
-    all: unset; /* 🔥 Quita todos los estilos nativos del botón */
-    display: grid;
-    grid-template-columns: 1.5fr 3fr 1.5fr;
-    padding: 1rem 2rem;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
-    align-items: center;
-    width: 100%;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    text-align: left;
-  }
-
-  .tutor-card:hover {
-    background-color: #f5f5f5;
-  }
-
-  .dashboard {
-    max-width: 1200px;
+  .contenido {
+    padding: 2rem 4rem;
+    max-width: 1400px;
     margin: auto;
-    padding-bottom: 3rem;
   }
 
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem 2rem 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .imagenlogo {
     height: 50px;
   }
 
-  .search-container {
-    padding: 0 2rem 1.5rem;
-  }
-
-  input[type="text"] {
+  .buscador {
+    padding: 1rem;
+    border-radius: 12px;
+    border: none;
     width: 100%;
-    padding: 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
+    max-width: 800px;
+    box-shadow: 3px 3px 0 #e4c168;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
   }
 
-  .table-header,
-  .tutor-card {
+  .tabla {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .fila {
     display: grid;
-    grid-template-columns: 1.5fr 3fr 1.5fr;
-    padding: 1rem 2rem;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
+    grid-template-columns: 2fr 1fr 3fr 1fr;
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 5px 5px 0 #f2cd6d;
     align-items: center;
+    font-size: 1.1rem;
   }
 
-  .table-header {
-    background-color: transparent;
+  .encabezado {
+    background: transparent;
+    box-shadow: none;
     font-weight: bold;
-    margin-top: 1rem;
-  }
-
-  .tutor-card span {
-    font-size: 15px;
-    color: #1E1E2F;
+    color: #FBBF24;
   }
 </style>

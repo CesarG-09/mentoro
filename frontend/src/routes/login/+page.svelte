@@ -1,103 +1,76 @@
 <script>
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
+  import { enhance } from '$app/forms';
+  export let form;
 
   let usuario = '';
   let clave = '';
-  let error = '';
   let cargando = false;
+  let mensajeError = '';
 
-  onMount(() => {
-    usuario = '';
-    clave = '';
-  });
-
-  async function login() {
-    error = '';
+  function customEnhance({ form, data, cancel }) {
     cargando = true;
+    mensajeError = '';
 
-    try {
-      const res = await fetch('http://localhost:3001/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario, clave })
-      });
+    return async ({ result, error, update }) => {
+      if (error) {
+        cargando = false;
+        mensajeError = error?.message || 'Error desconocido';
+      } else if (result) {
+        cargando = false;
+        update(result);
 
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
-
-        const tipo = data.usuario.tipo_usuario;
-        if (tipo === 'estudiante') {
-          goto('/estudiante/inicio');
-        } else if (tipo === 'tutor') {
-          // goto('/tutor/inicio');
-        } else if (tipo === 'administrador') {
-          goto('/administrador/dashboard');
-        } else {
-          error = 'Tipo de usuario desconocido';
-          console.log(error);
+        if (result.type === 'failure') {
+          mensajeError = result.data?.error || 'Error en validación';
         }
-      } else {
-        error = data.error || data.mensaje || 'Error en login';
       }
-    } catch (e) {
-      error = "Error al conectar con el servidor";
-      console.log(error);
-    } finally {
-      cargando = false;
-    }
+    };
+  }
+
+  $: if (form?.error) {
+    mensajeError = form.error;
   }
 </script>
 
 <div class="loginbox">
+  <div class="imagen1">
+      <img src="/mentoro_logo.png" alt="logo de imagen" class="imagenlogo">
+  </div>
 
-    <div class="imagen1">
-        <img src="/mentoro_logo.png" alt="logo de imagen" class="imagenlogo">
-    </div>
+  <div class="titulo1">
+      <h1 class="titulocentreado">Iniciar Sesión</h1>
+  </div>
 
-    <div class="titulo1">
-        <h1 class="titulocentreado">Iniciar Sesión</h1>
-    </div>
-
-    <form on:submit|preventDefault={login}>
-
+  <form method="POST" use:enhance={customEnhance}>
     <div class="correo">
         <label class="inputText" for="usuario">Usuario</label>
-        <input type="text" id="usuario" bind:value={usuario} autocomplete="off" required />
+        <input type="text" id="usuario" name="usuario" bind:value={usuario} autocomplete="off" required />
     </div>
 
     <div class="contrasena">
-        <label class="inputText" for="password">Contraseña</label>
-        <input type="password" id="password" bind:value={clave} required />
+        <label class="inputText" for="clave">Contraseña</label>
+        <input type="password" id="clave" name="clave" bind:value={clave} required />
     </div>
 
     <div class="loginRegistro">
         <button type="submit" disabled={cargando}>
-            {#if cargando}
-                Ingresando...
-            {:else}
-                Ingresar
-            {/if}
+          {#if cargando}
+            Ingresando...
+          {:else}
+            Ingresar
+          {/if}
         </button>
-
         <p>¿No tienes cuenta? <a href="/registro"><strong>Regístrate aquí</strong></a></p>
     </div>
-
   </form>
-
 </div>
 
 {#if cargando}
-    <p style="text-align: center; margin-top: 0px;">Validando credenciales...</p>
+  <p style="text-align: center; margin-top: 0px;">Validando credenciales...</p>
+  <div class="spinner"></div>
 {/if}
-{#if error}
-    <p style="color: red; text-align: center;">{error}</p>
-{/if}
-{#if cargando}
-    <div class="spinner"></div>
+
+{#if mensajeError}
+  <p style="color: red; text-align: center;">{mensajeError}</p>
 {/if}
 
 <style>

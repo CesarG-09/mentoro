@@ -1,15 +1,20 @@
 <script>
+  import { enhance } from '$app/forms';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
 
-  let error = '';
+  export let data; // contiene facultades y materias del load()
+
+  // ESTADOS Y VARIABLES
+
+  let mensajeError = '';
   let cargando = false;
   let mostrarLista = false;
 
-  // DESPLEGABLES ESTUDIANTE
-  let facultades = [];
+  let facultades = data.facultades;
+  let materias = data.materias.map(m => ({ ...m, de_materia: quitarAcentos(m.de_materia) }));
   let carreras = [];
-  let materias = [];
+
   let id_facultad = '';
   let id_carrera = '';
   let id_materia = '';
@@ -55,13 +60,13 @@
     tipo_usuario = '';
   });
 
+  // VALIDACIONES Y FUNCIONES CLIENTE
+  $: errorMensaje = (confirmClave && clave !== confirmClave) ? 'Las contraseñas no coinciden' : '';
+  $: materiasFiltradas = materias.filter(materia => materia.de_materia.toLowerCase().includes(materiaInput.toLowerCase()));
+
   function agregarDisponibilidad() {
     if (!diaSeleccionado || !horaInicio || !horaFin) return;
-    disponibilidad = [
-      ...disponibilidad,
-      { dia: diaSeleccionado, inicio: horaInicio, fin: horaFin }
-    ];
-    // Limpiar selección
+    disponibilidad = [...disponibilidad, { dia: diaSeleccionado, inicio: horaInicio, fin: horaFin }];
     diaSeleccionado = '';
     horaInicio = '07:00';
     horaFin = '08:00';
@@ -70,16 +75,6 @@
   function eliminarDisponibilidad(dia) {
     disponibilidad = disponibilidad.filter(d => d.dia !== dia);
   }
-
-  // Reactive statement que actualiza errorMensaje cuando clave o confirmClave cambian
-  $: errorMensaje = (confirmClave && clave !== confirmClave)
-    ? 'Las contraseñas no coinciden'
-    : '';
-
-  // Variable reactiva que actualiza el listado filtrado automáticamente
-  $: materiasFiltradas = materias.filter(materia =>
-    materia.de_materia.toLowerCase().includes(materiaInput.toLowerCase())
-  );
 
   function seleccionarMateria(nombre) {
     materiaInput = nombre;
@@ -92,84 +87,15 @@
 
   function agregarMateria() {
     const materia = materiaInput.trim();
-
-    // Verifica si existe dentro del arreglo de materias
     const existe = materias.some(m => m.de_materia.toLowerCase() === materia.toLowerCase());
-
     if (materia && existe && !materiasSelected.includes(materia)) {
       materiasSelected = [...materiasSelected, materia];
     }
-
     materiaInput = '';
   }
 
   function eliminarMateria(materia) {
     materiasSelected = materiasSelected.filter(m => m !== materia);
-  }
-
-  function registrar() {
-    if (tipo_usuario === 'estudiante') {
-      regirtrarEstudiante();
-    } else if (tipo_usuario === 'tutor') {
-      registrarTutor();
-    } else {
-      alert('Debes seleccionar un tipo de usuario');
-    }
-  }
-
-  async function regirtrarEstudiante() {
-    error = '';
-    cargando = true;
-
-    try {
-      const res = await fetch('http://localhost:3001/api/registro-estudiante', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ usuario, clave, tipo_usuario, nombre, apellido, correo_utp, fe_nacimiento, id_carrera })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
-
-        const tipo = data.usuario.tipo_usuario;
-        if (tipo === 'estudiante') {
-          goto('/estudiante/inicio');
-        } else if (tipo === 'tutor') {
-          //goto('/tutor/inicio');
-        } else {
-          error = 'Tipo de usuario desconocido';
-          console.log(error);
-        }
-      } else {
-        error = data.error || data.mensaje || 'Error en registro';
-      }
-    } catch (e) {
-      error = "Error al conectar con el servidor";
-      console.log(error);
-    } finally {
-      cargando = false;
-    }
-  }
-
-  async function registrarTutor() {
-    console.log("Registro de tutor");
-  }
-
-  async function getFacultades() {
-    if (tipo_usuario === 'estudiante') {
-      try {
-        const res = await fetch('http://localhost:3001/api/facultades');
-        if (!res.ok) throw new Error('Error al obtener facultades');
-        const data = await res.json();
-        facultades = data.facultades;
-        console.log("facultades");
-      } catch (err) {
-        console.error('Error en la API: ', err);
-      }
-    }
   }
 
   async function getCarreras() {
@@ -184,21 +110,21 @@
     }
   }
 
-  async function getMaterias() {
-    if (tipo_usuario === 'tutor') {
-      try {
-        const res = await fetch('http://localhost:3001/api/materias');
-        if (!res.ok) throw new Error('Error al obtener materias');
-        const data = await res.json();
-        console.log("si carga");
-        materias = data.materias.map(m => ({
-          ...m,
-          de_materia: quitarAcentos(m.de_materia)
-        }));
-      } catch (err) {
-        console.error('Error de la API: ', err);
+  function customEnhance({ form }) {
+    cargando = true;
+    mensajeError = '';
+
+    return async ({ result, error, update, event }) => {
+      cargando = false;
+
+      if (error) {
+        mensajeError = error?.message || 'Error desconocido';
+      } else if (result.type === 'failure') {
+        mensajeError = result.data?.error || 'Error en validación';
+      } else {
+        update(result);
       }
-    }
+    };
   }
 </script>
 
@@ -209,36 +135,36 @@
     <div class="Registro">
         <h1>Registro</h1>
     </div>
-    <form on:submit|preventDefault={registrar}>
+    <form method="POST" action={tipo_usuario === 'tutor' ? '?/registrarTutor' : '?/registrarEstudiante'} use:enhance={customEnhance}>
 
         <div class="texto_titulo">
             <label for=name>Nombre</label>
-            <input type="text" id=name bind:value={nombre} autocomplete="off">
+            <input name="nombre" type="text" id=name bind:value={nombre} autocomplete="off" required>
         </div>
 
         <div class="texto_titulo">
             <label for=apellido>Apellido</label>
-            <input type="text" id=apellido bind:value={apellido} autocomplete="off">
+            <input name="apellido" type="text" id=apellido bind:value={apellido} autocomplete="off" required>
         </div>
 
         <div class="texto_titulo">
             <label for=correo>Correo institucional</label>
-            <input type="email" id=correo bind:value={correo_utp} autocomplete="off">
+            <input name="correo_utp" type="email" id=correo bind:value={correo_utp} autocomplete="off" required>
         </div>
 
         <div class="texto_titulo">
             <label for=nacimiento>Fecha de nacimiento</label>
-            <input type="date" id=nacimiento bind:value={fe_nacimiento} autocomplete="off">
+            <input name="fe_nacimiento" type="date" id=nacimiento bind:value={fe_nacimiento} autocomplete="off" required>
         </div>
 
         <div class="texto_titulo">
             <label for=usuario>Usuario</label>
-            <input id=usuario type="text" bind:value={usuario} autocomplete="off">
+            <input name="usuario" id=usuario type="text" bind:value={usuario} autocomplete="off" required>
         </div>
 
         <div class="texto_titulo">
           <label for=clave>Contraseña</label>
-          <input id=clave type="password" bind:value={clave} required>
+          <input name="clave" id=clave type="password" bind:value={clave} required>
         </div>
 
         <div class="texto_titulo">
@@ -252,7 +178,7 @@
 
         <div class="texto_titulo">
             <label for=userType>Tipo de usuario</label>
-            <select bind:value={tipo_usuario} on:change={getFacultades(), getMaterias} id=userType autocomplete="off" required>
+            <select name="tipo_usuario" bind:value={tipo_usuario} id=userType autocomplete="off" required>
                 <option value="" disabled selected>Seleccione...</option>
                 <option value="estudiante">Estudiante</option>
                 <option value="tutor">Tutor</option>
@@ -346,7 +272,7 @@
             <h3>Datos del Estudiante</h3>
             <div class="texto_titulo">
                 <label for=faculty>Facultad</label>
-                <select id=faculty bind:value={id_facultad} on:change={getCarreras}>
+                <select id=faculty bind:value={id_facultad} on:change={getCarreras} required>
                     <option value="" disabled selected>Seleccione...</option>
                     {#each facultades as facultad}
                         <option value={facultad.id_facultad}>{facultad.de_facultad}</option>
@@ -355,7 +281,7 @@
             </div>
             <div class= "texto_titulo">
                 <label for=carreer>Carrera</label>
-                <select id=carreer bind:value={id_carrera}>
+                <select name="id_carrera" id=carreer bind:value={id_carrera} required>
                     <option value="" disabled selected>Seleccione...</option>
                     {#each carreras as carrera}
                         <option value={carrera.id_carrera}>{carrera.de_carrera}</option>
@@ -364,7 +290,7 @@
             </div>
         {/if}
         <div class="registrar">
-            <button type="submit" disabled={cargando}>
+            <button type="submit" name="action" value={tipo_usuario === 'tutor' ? 'registrarTutor' : 'registrarEstudiante'} disabled={cargando}>
             {#if cargando}
                 Registrando...
             {:else}
@@ -373,19 +299,14 @@
             </button>
         </div>
     </form>
+    {#if cargando}
+      <p style="text-align: center; margin-top: 0px;">Validando credenciales...</p>
+      <div class="spinner"></div>
+    {/if}
+    {#if mensajeError}
+      <p style="color: red; text-align: center;">{mensajeError}</p>
+    {/if}
 </div>
-
-{#if cargando}
-  <p style="text-align: center; margin-top: 10px;">Validando datos...</p>
-{/if}
-
-{#if error}
-  <p style="color: red; text-align: center;">{error}</p>
-{/if}
-
-{#if cargando}
-  <div class="spinner"></div>
-{/if}
 
 <style>
     :global(body) {

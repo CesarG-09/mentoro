@@ -76,10 +76,6 @@
   });
 </script>
 
-<svelte:head>
-  <title>Dashboard - Mentoro</title>
-</svelte:head>
-
 <div class="dashboard">
   <div class="header">
     <div class="left">
@@ -128,14 +124,14 @@
   .dashboard {
     max-width: 1200px;
     margin: auto;
-    padding-bottom: 3rem;
+    padding-bottom: 1rem;
   }
 
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem 2rem 1rem;
+    padding: 1rem 2rem 1rem;
   }
 
   .resumen {
