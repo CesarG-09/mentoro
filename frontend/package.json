@@ -17,6 +17,10 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
+		"@fullcalendar/core": "^6.1.18",
+		"@fullcalendar/daygrid": "^6.1.18",
+		"@fullcalendar/interaction": "^6.1.18",
+		"apexcharts": "^5.2.0",
 		"chart.js": "^4.5.0",
 		"jsonwebtoken": "^9.0.2"
 	}
