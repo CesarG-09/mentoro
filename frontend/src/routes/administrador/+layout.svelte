@@ -1,13 +1,49 @@
 <script>
-  import RutaProtegida from '$lib/RutaProtegida.svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   $: pathname = $page.url.pathname;
 
-  function cerrarSesion() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
-    goto('/login');
+  export let data;
+
+  let intervalId;
+
+	onMount(() => {
+		// Ejecuta al montar el layout
+		checkSession();
+
+		// Verifica cada 60 segundos
+		intervalId = setInterval(checkSession, 60_000);
+	});
+
+	onDestroy(() => {
+		clearInterval(intervalId);
+	});
+
+	async function checkSession() {
+		try {
+			const res = await fetch('/api/check-session');
+
+			if (!res.ok) {
+				console.log('Sesión inválida o expirada. Redirigiendo...');
+				goto('/login');
+			}
+		} catch (err) {
+			console.error('Error verificando sesión:', err);
+			goto('/login');
+		}
+	}
+
+  async function cerrarSesion() {
+    try {
+      await fetch('/api/logout', {
+        method: 'POST',
+      });
+
+      goto('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   }
 
   function esActiva(ruta) {
@@ -15,7 +51,6 @@
   }
 </script>
 
-<RutaProtegida tipoEsperado="administrador"/>
 
 <div class="nav-bar">
   <div class="nav-links">
@@ -24,7 +59,7 @@
     <a href="/administrador/estudiantes" class:active={esActiva('/administrador/estudiantes')}>Estudiantes</a>
   </div>
   <div class="user-info">
-    <span>Hola, <strong>admin@mentoro.pa</strong></span>
+    <span>Hola, <strong>{data.usuario.usuario}</strong></span>
     <button on:click={cerrarSesion}>Cerrar sesión</button>
   </div>
 </div>
