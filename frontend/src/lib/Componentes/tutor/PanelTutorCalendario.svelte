@@ -72,7 +72,9 @@
 <svelte:head>
   <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.css" rel="stylesheet" />
 </svelte:head>
-
+  <div class="header">
+    <h2>Calendario de Tutorías</h2>
+  </div>
 <!-- Calendario principal -->
 <div class="calendario-contenedor">
   <div bind:this={calendarioEl} id="calendario"></div>
@@ -102,6 +104,14 @@
 {/if}
 
 <style>
+    .header {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    max-width: 1200px;
+    padding-left: 5rem;
+
+  }
   .calendario-contenedor {
     max-width: 1000px;
     margin: 2rem auto;
@@ -121,7 +131,14 @@
     color: #1E1E2F !important;
     font-weight: bold;
   }
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    max-width: 1200px;
+    padding-left: 5rem;
 
+  }
   .panel-tutorias {
     max-width: 1000px;
     margin: 2rem auto 0;

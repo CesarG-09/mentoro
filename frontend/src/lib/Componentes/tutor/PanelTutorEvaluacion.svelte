@@ -80,8 +80,10 @@
     .slice()
     .sort(comparar);
 </script>
-
-<!-- 🔎 Filtros -->
+    <div class="header">
+      <h2>Evaluar Tutorías</h2>
+    </div>
+<!-- Filtros -->
 <div class="filtros">
   <label>
     🟢 Estado:
@@ -92,7 +94,6 @@
       {/each}
     </select>
   </label>
-
   <button on:click={alternarOrdenFecha}>📅 Fecha {ordenFechaReciente ? '🔽' : '🔼'}</button>
   <button on:click={alternarOrdenNombre}>🔠 Nombre {ordenNombreAscendente ? '🔼' : '🔽'}</button>
   <button on:click={alternarOrdenMateria}>📘 Materia {ordenMateriaAscendente ? '🔼' : '🔽'}</button>
@@ -128,14 +129,29 @@
 </div>
 
 <style>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #F2EEE6;
+  }
+    .header {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    max-width: 1200px;
+    padding-left: 5rem;
+
+  }
   .filtros {
     max-width: 1000px;
     margin: 0 auto;
-    padding: 1rem 2rem;
+
     display: flex;
     gap: 0.3rem;
     flex-wrap: wrap;
     align-items: center;
+    
   }
 
   .filtros button {
@@ -148,22 +164,26 @@
     cursor: pointer;
     height: 40px;
     display: flex;
-    align-items: center;
+
   }
 
   .filtros select {
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
+    height: 40px;
     background-color: white;
     font-weight: bold;
     cursor: pointer;
+    align-items: center;
   }
 
   .filtros label select {
+    padding: 0.4rem 0.8rem;
     margin-left: 0.5rem;
     border: none;
     font-weight: bold;
     background-color: white;
+    border: 1px solid #ccc;
   }
 
   .contenedor-evaluaciones {
@@ -219,5 +239,17 @@
 
   button:hover {
     background-color: #facc15;
+  }
+
+  select {
+    margin-top: 1rem;
+    background-color:  white;
+    padding: 0.5rem 1.2rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #1E1E2F;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
   }
 </style>
