@@ -87,12 +87,19 @@
 
   function agregarMateria() {
     const materiaNombre = materiaInput.trim();
-    const existe = materias.some(m => m.de_materia.toLowerCase() === materiaNombre.toLowerCase());
-    const yaExiste = materiasSelected.some(m => m.nombre === materiaNombre);
+    const materiaEncontrada = materias.find(m => m.de_materia.toLowerCase() === materiaNombre.toLowerCase());
+    const yaExiste = materiasSelected.some(m => m.id_materia === materiaEncontrada?.id_materia);
 
-    if (materiaNombre && existe && !yaExiste) {
-      materiasSelected = [...materiasSelected, { nombre: materiaNombre, precio: '' }];
-    }
+    if (materiaNombre && materiaEncontrada && !yaExiste) {
+    materiasSelected = [
+      ...materiasSelected,
+      {
+        id_materia: materiaEncontrada.id_materia,
+        nombre: materiaEncontrada.de_materia,
+        precio: ''
+      }
+    ];
+  }
 
     materiaInput = '';
   }
@@ -116,6 +123,9 @@
   function customEnhance({ form }) {
     cargando = true;
     mensajeError = '';
+
+    if (disponibilidad.length <= 0) {return cargando = false, mensajeError = 'Disponibilidad no añadida'}
+    if (materiasSelected.length <= 0) {return cargando = false, mensajeError = 'Materias no añadidas'}
 
     return async ({ result, error, update, event }) => {
       cargando = false;
@@ -229,9 +239,9 @@
                   <button type="button" on:click={() => eliminarDisponibilidad(item.dia)}>✕</button>
                 </div>
               {/each}
+              <input type="hidden" name="disponibilidad" value={JSON.stringify(disponibilidad)} />
             </div>
           {/if}
-
 
           <div id=aggmaterias class="texto_titulo">
             <label for=aggmaterias>Materias que deseas enseñar</label>
@@ -244,6 +254,7 @@
               placeholder="Materia..."
               on:keydown={(e) => e.key === 'Enter' && (e.preventDefault(), agregarMateria())}
               on:focus={() => mostrarLista = true}
+              on:blur={() => setTimeout(() => mostrarLista = false, 500)}
             />
             <button type="button" on:click={agregarMateria}> Agregar </button>
           </div>
@@ -282,6 +293,7 @@
                   </div>
                 </div>
                 {/each}
+                <input type="hidden" name="materias" value={JSON.stringify(materiasSelected)} />
               </div>
             {/if}
           </div>

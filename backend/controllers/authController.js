@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const { generarToken } = require('../utils/authUtils');
 const { 
-  registrarEstudiante, 
+  registrarEstudiante,
+  registrarTutor,
   buscarUsuario, 
   listarFacultades, 
   listarCarreras, 
@@ -45,7 +46,7 @@ const registroEstudiante = async (req, res) => {
       const token = generarToken(user);
       
       return res.status(201).json({
-        mensaje: 'Login exitoso',
+        mensaje: 'Registro exitoso',
         token,
         usuario: {
           usuario: user.usuario,
@@ -55,6 +56,96 @@ const registroEstudiante = async (req, res) => {
     }
 
     return res.status(500).json({ mensaje: 'Error desconocido' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+};
+
+const registroTutor = async (req, res) => {
+  try {
+    const { 
+      usuario, 
+      clave, 
+      tipo_usuario, 
+      nombre, 
+      apellido, 
+      correo_utp, 
+      fe_nacimiento, 
+      dias_disponibles, 
+      horas_inicio,
+      horas_fin, 
+      materias,
+      precios_materias  
+    } = req.body;
+
+    if (!usuario || !clave || !tipo_usuario || !nombre || !apellido || !correo_utp || !fe_nacimiento || !dias_disponibles || !horas_inicio || !horas_fin || !materias || !precios_materias) {
+      return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+    }
+
+    if (tipo_usuario !== 'tutor') {
+      return res.status(400).json({ mensaje: 'El tipo_usuario debe ser tutor' });
+    }
+
+    const clave_hash = await bcrypt.hash(clave, 10);
+    const resultado = await registrarTutor({ usuario, clave_hash, tipo_usuario, nombre, apellido, correo_utp, fe_nacimiento, dias_disponibles, horas_inicio, horas_fin, materias, precios_materias });
+
+    if (resultado === 'CORREO_INVALIDO') {
+      return res.status(400).json({ mensaje: 'Formato de correo invalido' });
+    }
+
+    if (resultado === 'FECHA_NACIMIENTO_INVALIDA') {
+      return res.status(400).json({ mensaje: 'Fecha de nacimiento invalida' });
+    }
+
+    if (resultado === 'USUARIO_EXISTENTE') {
+      return res.status(400).json({ mensaje: 'Usuario ya existe' });
+    }
+
+    if (resultado === 'CORREO_UTP_EXISTENTE') {
+      return res.status(400).json({ mensaje: 'Correo UTP ya registrado' });
+    }
+
+    if (resultado === 'DISPONIBILIDAD_LONGITUD_INCONSISTENTE') {
+      return res.status(400).json({ mensaje: 'Error en arreglo de disponibilidad' });
+    }
+
+    if (resultado === 'MATERIAS_PRECIOS_LONGITUD_INCONSISTENTE') {
+      return res.status(400).json({ mensaje: 'Error en arreglo de materias' });
+    }
+
+    if (resultado === 'HORA_INVALIDA') {
+      return res.status(400).json({ mensaje: 'Hora de inicio mayor que hora de fin' });
+    }
+
+    if (resultado === 'DIA_INVALIDO') {
+      return res.status(400).json({ mensaje: 'Dia(s) ingresado(s) incorrecto(s)' });
+    }
+
+    if (resultado === 'PRECIO_INVALIDO') {
+      return res.status(400).json({ mensaje: 'Formato de precio invalido' });
+    }
+
+    if (resultado === 'MATERIA_NO_ENCONTRADA') {
+      return res.status(400).json({ mensaje: 'Materia no encontrada' });
+    }
+
+    if (resultado === 'TUTOR_REGISTRADO') {
+      const user = await buscarUsuario(usuario);
+      const token = generarToken(user);
+      
+      return res.status(201).json({
+        mensaje: 'Registro exitoso',
+        token,
+        usuario: {
+          usuario: user.usuario,
+          tipo_usuario: user.tipo_usuario
+        }
+      });
+    }
+
+    return res.status(500).json({ mensaje: resultado });
 
   } catch (error) {
     console.error(error);
@@ -328,6 +419,7 @@ const muestraEstudiante = async (req, res) => {
 
 module.exports = {
   registroEstudiante,
+  registroTutor,
   login,
   listaFacultades,
   listaCarreras,

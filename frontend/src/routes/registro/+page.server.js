@@ -58,9 +58,7 @@ export const actions = {
 
     registrarTutor: async ({ request, cookies, fetch }) => {
         console.log('Implementar acción para registrar tutor cuando exista API');
-        return fail(400, { error: 'No implementado aún' });
-
-        /*
+        
         const form = await request.formData();
         const body = {
             usuario: form.get('usuario'),
@@ -69,9 +67,12 @@ export const actions = {
             nombre: form.get('nombre'),
             apellido: form.get('apellido'),
             correo_utp: form.get('correo_utp'),
-            fe_nacimiento: form.get('fe_nacimiento')
-            
-            //AÑADIR DISPONIBILIDAD Y MATERIAS
+            fe_nacimiento: form.get('fe_nacimiento'),
+            dias_disponibles: JSON.parse(form.get('disponibilidad') || '[]').map(item => item.dia),
+            horas_inicio: JSON.parse(form.get('disponibilidad') || '[]').map(item => item.inicio),
+            horas_fin: JSON.parse(form.get('disponibilidad') || '[]').map(item => item.fin),
+            materias: JSON.parse(form.get('materias') || '[]').map(item => item.id_materia),
+            precios_materias: JSON.parse(form.get('materias') || '[]').map(item => item.precio)
         };
 
         const res = await fetch('http://localhost:3001/api/registro-tutor', {
@@ -91,13 +92,12 @@ export const actions = {
             });
             
             console.log("Tutor Registrado!");
-            throw redirect(303, '/tutor/inicio');
+            throw redirect(303, '/tutor/dashboard');
         } else {
             console.log(data.mensaje);
             return fail(res.status, {
                 error: data?.mensaje || 'Registro fallido'
             });
         }
-        */
     }
 };

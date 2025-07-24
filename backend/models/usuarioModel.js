@@ -1,11 +1,44 @@
 const pool = require('../config/db');
 
 async function registrarEstudiante(data) {
-  const { usuario, clave_hash, tipo_usuario, nombre, apellido, correo_utp, fe_nacimiento, id_carrera } = data;
+  const { 
+    usuario, 
+    clave_hash, 
+    tipo_usuario, 
+    nombre, 
+    apellido, 
+    correo_utp, 
+    fe_nacimiento, 
+    id_carrera 
+  } = data;
 
   const { rows } = await pool.query(
     `SELECT public.registrar_estudiante($1, $2, $3, $4, $5, $6, $7, $8) AS resultado`,
     [usuario, clave_hash, tipo_usuario, nombre, apellido, correo_utp, fe_nacimiento, id_carrera]
+  );
+
+  return rows[0].resultado;
+}
+
+async function registrarTutor(data) {
+  const { 
+    usuario, 
+    clave_hash, 
+    tipo_usuario, 
+    nombre, 
+    apellido, 
+    correo_utp, 
+    fe_nacimiento, 
+    dias_disponibles, 
+    horas_inicio, 
+    horas_fin, 
+    materias, 
+    precios_materias  
+  } = data;
+
+  const { rows } = await pool.query(
+    `SELECT public.registrar_tutor($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) AS resultado`,
+    [usuario, clave_hash, tipo_usuario, nombre, apellido, correo_utp, fe_nacimiento, dias_disponibles, horas_inicio, horas_fin, materias, precios_materias]
   );
 
   return rows[0].resultado;
@@ -43,7 +76,7 @@ async function listarCarreras(facultad) {
 
 async function listarMaterias() {
   const resultado = await pool.query(
-    `SELECT de_materia FROM Materia`
+    `SELECT id_materia, de_materia FROM Materia`
   );
   return resultado.rows;
 }
@@ -124,6 +157,7 @@ async function verEstudiante(id_estudiante) {
 
 module.exports = {
   registrarEstudiante,
+  registrarTutor,
   buscarUsuario,
   listarFacultades,
   listarCarreras,

@@ -28,7 +28,7 @@ export const actions = {
       } else if (tipo === 'estudiante') {
         throw redirect(303, '/estudiante/inicio');
       } else if (tipo === 'tutor') {
-        throw redirect(303, '/tutor/inicio');
+        throw redirect(303, '/tutor/dashboard');
       } else {
         return fail(400, { error: 'Tipo de usuario desconocido' });
       }
