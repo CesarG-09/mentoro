@@ -3,42 +3,21 @@
 <script>
   import { goto } from '$app/navigation';
 
+  export let data;
+
   let busqueda = '';
 
-  let tutores = [
-    {
-      nombre: 'Alexander Acosta',
-      materias: ['Matemática', 'Química', 'Ecuaciones'],
-      calificacion: 5,
-      slug: 'alexander-acosta'
-    },
-    {
-      nombre: 'Anabel Castillo',
-      materias: ['Inglés'],
-      calificacion: 4,
-      slug: 'anabel-castillo'
-    },
-    {
-      nombre: 'Carlos Gómez',
-      materias: ['Ecuaciones', 'Matemática Superior'],
-      calificacion: 3,
-      slug: 'carlos-gomez'
-    },
-    {
-      nombre: 'Camila Méndez',
-      materias: ['Cálculo I', 'Cálculo II', 'Cálculo III'],
-      calificacion: 5,
-      slug: 'camila-mendez'
-    }
-  ];
+  let tutores = data.listaTutores;
 
   $: tutoresFiltrados = tutores.filter(t =>
-    t.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    t.materias.some(m => m.toLowerCase().includes(busqueda.toLowerCase()))
+  t.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+  t.materias
+    .split(',')
+    .some(m => m.trim().toLowerCase().includes(busqueda.toLowerCase()))
   );
 
-  function verTutor(slug) {
-    goto(`/administrador/tutores/${slug}`);
+  function verTutor(slug, id) {
+    goto(`/administrador/tutores/${slug}${id}`);
   }
 </script>
 
@@ -66,9 +45,9 @@
   </div>
 
   {#each tutoresFiltrados as tutor}
-    <button type="button" class="tutor-card clickable" on:click={() => verTutor(tutor.slug)}>
+    <button type="button" class="tutor-card clickable" on:click={() => verTutor(tutor.slug, tutor.id_tutor)}>
       <span>{tutor.nombre}</span>
-      <span>{tutor.materias.join(', ')}</span>
+      <span>{tutor.materias}</span>
       <span>
         {#each Array(tutor.calificacion) as _}
           ⭐

@@ -5,7 +5,16 @@ const {
   buscarUsuario, 
   listarFacultades, 
   listarCarreras, 
-  listarMaterias 
+  listarMaterias,
+  totalizarEstudiantes,
+  totalizarTutores,
+  totalizarReservasFinalizadas,
+  graficarAceptVsRechaz,
+  graficarMaterias,
+  listarTutores,
+  verTutor,
+  listarEstudiantes,
+  verEstudiante
 } = require('../models/usuarioModel');
 
 const registroEstudiante = async (req, res) => {
@@ -147,10 +156,189 @@ const listaMaterias = async (_req, res) => {
   }
 }
 
+const totalizaEstudiantes = async (_req, res) => {
+  try {
+    const resultado = await totalizarEstudiantes();
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontraron estudiantes' })
+    }
+
+    return res.status(200).json({
+			mensaje: 'Total obtenido exitosamente',
+			cantidad: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener total de estudiantes:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const totalizaTutores = async (_req, res) => {
+  try {
+    const resultado = await totalizarTutores();
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontraron tutores' })
+    }
+
+    return res.status(200).json({
+			mensaje: 'Total obtenido exitosamente',
+			cantidad: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener total de tutores:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const totalizaReservasFinalizadas = async (_req, res) => {
+  try {
+    const resultado = await totalizarReservasFinalizadas();
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontraron reservas' })
+    }
+
+    return res.status(200).json({
+			mensaje: 'Total obtenido exitosamente',
+			cantidad: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener total de reservas:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const listaTutores = async (_req, res) => {
+  try {
+    const resultado = await listarTutores();
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontraron tutores' })
+    }
+
+    return res.status(200).json({
+			mensaje: 'Total obtenido exitosamente',
+			tutores: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener lista de tutores:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const muestraTutor = async (req, res) => {
+  try{
+    const id_tutor = req.query.id_tutor;
+    if (!id_tutor) {
+      return res.status(400).json({ error: 'El id_tutor es requerido' });
+    }
+
+    const resultado = await verTutor(id_tutor);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontró el tutor' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Tutor obtenido exitosamente',
+			tutor: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener tutor:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const graficaAceptVsRechaz = async (_req, res) => {
+  try {
+    const resultado = await graficarAceptVsRechaz();
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontraron datos de reservas' })
+    }
+
+    return res.status(200).json({
+			mensaje: 'Datos obtenidos exitosamente',
+			grafica: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener datos de reservas:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const graficaMaterias = async (_req, res) => {
+  try {
+    const resultado = await graficarMaterias();
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontraron datos de reservas' })
+    }
+
+    return res.status(200).json({
+			mensaje: 'Datos obtenidos exitosamente',
+			grafica: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener datos de reservas:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const listaEstudiantes = async (_req, res) => {
+  try {
+    const resultado = await listarEstudiantes();
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontraron estudiantes' })
+    }
+
+    return res.status(200).json({
+			mensaje: 'Total obtenido exitosamente',
+			estudiantes: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener lista de estudiantes:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const muestraEstudiante = async (req, res) => {
+  try{
+    const id_estudiante = req.query.id_estudiante;
+    if (!id_estudiante) {
+      return res.status(400).json({ error: 'El id_estudiante es requerido' });
+    }
+
+    const resultado = await verEstudiante(id_estudiante);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontró el estudiante' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Estudiante obtenido exitosamente',
+			estudiante: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener estudiante:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
 module.exports = {
   registroEstudiante,
   login,
   listaFacultades,
   listaCarreras,
-  listaMaterias
+  listaMaterias,
+  totalizaEstudiantes,
+  totalizaTutores,
+  totalizaReservasFinalizadas,
+  graficaAceptVsRechaz,
+  graficaMaterias,
+  listaTutores,
+  muestraTutor,
+  listaEstudiantes,
+  muestraEstudiante
 };

@@ -14,16 +14,4 @@ const verificarToken = (req, res, next) => {
     });
 };
 
-function permitirRoles(...rolesPermitidos) {
-  return (req, res, next) => {
-    const { tipo_usuario } = req.usuario;
-
-    if (!rolesPermitidos.includes(tipo_usuario)) {
-      return res.status(403).json({ error: 'Acceso no autorizado' });
-    }
-
-    next();
-  };
-}
-
-module.exports = { verificarToken, permitirRoles };
+module.exports = { verificarToken };

@@ -48,10 +48,93 @@ async function listarMaterias() {
   return resultado.rows;
 }
 
+async function totalizarEstudiantes() {
+  const resultado = await pool.query(
+    `SELECT 
+      COUNT(*) 
+     FROM Estudiante e
+     JOIN Usuario u ON e.id_usuario = u.id_usuario
+     WHERE u.estado = 'activo'`
+  );
+  return resultado.rows[0];
+}
+
+async function totalizarTutores() {
+  const resultado = await pool.query(
+    `SELECT 
+      COUNT(*) 
+     FROM Tutor t
+     JOIN Usuario u ON u.id_usuario = t.id_usuario
+     WHERE u.estado = 'activo'`
+  );
+  return resultado.rows[0];
+}
+
+async function totalizarReservasFinalizadas() {
+  const resultado = await pool.query(
+    `SELECT COUNT(*) FROM Reserva
+     WHERE estado_reserva IN ('Aceptada') AND estado_tutoria IN ('Finalizada')`
+  );
+  return resultado.rows[0];
+}
+
+async function listarTutores() {
+  const resultado = await pool.query(
+    `SELECT * FROM tutor_materia_cal();`
+  );
+  return resultado.rows;
+}
+
+async function verTutor(id_tutor) {
+  const resultado = await pool.query(
+    `SELECT * FROM resumen_tutor($1)`,
+    [id_tutor]
+  );
+  return resultado.rows[0];
+}
+
+async function graficarAceptVsRechaz() {
+  const resultado = await pool.query(
+    `SELECT * FROM grafica_aceptada_rechazada`
+  );
+  return resultado.rows;
+}
+
+async function graficarMaterias() {
+  const resultado = await pool.query(
+    `SELECT * FROM top_materias_mes_actual`
+  );
+  return resultado.rows;
+}
+
+async function listarEstudiantes() {
+  const resultado = await pool.query(
+    `SELECT * FROM listado_estudiantes_administración`
+  );
+  return resultado.rows;
+}
+
+async function verEstudiante(id_estudiante) {
+  const resultado = await pool.query(
+    `SELECT * FROM resumen_estudiante($1)`,
+    [id_estudiante]
+  );
+  return resultado.rows[0];
+}
+
 module.exports = {
   registrarEstudiante,
   buscarUsuario,
   listarFacultades,
   listarCarreras,
-  listarMaterias
+  listarMaterias,
+  totalizarEstudiantes,
+  totalizarTutores,
+  totalizarReservasFinalizadas,
+  graficarAceptVsRechaz,
+  graficarMaterias,
+  listarTutores,
+  verTutor,
+  listarEstudiantes,
+  verEstudiante
 };

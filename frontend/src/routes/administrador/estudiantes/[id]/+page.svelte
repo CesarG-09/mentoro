@@ -1,19 +1,19 @@
 <script>
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
+  export let data;
 
   let estudiante = {
-    nombre: "Ana González",
-    facultad: "FISC",
-    correo: "ana.gonzalez@utp.ac.pa",
-    activas: 1,
-    completadas: 4,
-    horas: 6,
-    materias: [
-      { nombre: "Estructura de Datos", horas: 1 },
-      { nombre: "Programación", horas: 2 },
-      { nombre: "Cálculo II", horas: 3 }
-    ]
+    nombre: data.estudiante.nombre,
+    facultad: data.estudiante.facultad,
+    correo: data.estudiante.correo,
+    activas: data.estudiante.tutorias_activas,
+    completadas: data.estudiante.tutorias_completadas,
+    horas: data.estudiante.horas_tutoria_recibidas,
+    materias: {
+      labels: data.estudiante.grafica_horas_por_materia.map(m => m.materia),
+      data: data.estudiante.grafica_horas_por_materia.map(m => m.horas)
+    }
   };
 
   let chart;
@@ -24,10 +24,10 @@
     chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: estudiante.materias.map(m => m.nombre),
+        labels: estudiante.materias.labels,
         datasets: [{
           label: 'Horas',
-          data: estudiante.materias.map(m => m.horas),
+          data: estudiante.materias.data,
           backgroundColor: '#FBBF24'
         }]
       },
@@ -82,7 +82,7 @@
     </div>
 
     <!-- Gráfico -->
-    <div class="derecha">
+    <div class="derecha card">
       <h4>Horas de Tutoría Recibidas</h4>
       <canvas id="barChartEstudiante" width="500" height="300"></canvas>
     </div>
@@ -178,7 +178,6 @@
     background: white;
     padding: 1.5rem;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   }
 
   canvas {

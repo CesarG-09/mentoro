@@ -1,10 +1,21 @@
 <script>
-  let estudiantes = [
-    { nombre: "Ana González", facultad: "FISC", correo: "ana.gonzalez@utp.ac.pa", horas: 6 },
-    { nombre: "Carolina Gómez", facultad: "FII", correo: "carolina.gomez@utp.ac.pa", horas: 4 },
-    { nombre: "Carlos Gómez", facultad: "FIM", correo: "carlos.gomez@utp.ac.pa", horas: 9 },
-    { nombre: "Camila Mendez", facultad: "FISC", correo: "camila.mendez@utp.ac.pa", horas: 2 }
-  ];
+  import { goto } from '$app/navigation';
+  export let data;
+
+  let busqueda = '';
+
+  let estudiantes = data.listaEstudiantes;
+
+  $: estudiantesFiltrados = estudiantes.filter(t =>
+  t.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+  t.facultad
+    .split(',')
+    .some(m => m.trim().toLowerCase().includes(busqueda.toLowerCase()))
+  );
+
+  function verEstudiante(slug, id) {
+    goto(`/administrador/estudiantes/${slug}${id}`);
+  }
 </script>
 
 <div class="contenido">
@@ -15,23 +26,23 @@
     </div>
   </div>
 
-  <input class="buscador" type="text" placeholder="Buscar Estudiantes" />
+  <input class="buscador" type="text" placeholder="Buscar Estudiantes" bind:value={busqueda} />
 
   <div class="tabla">
     <div class="fila encabezado">
       <div>Nombre</div>
       <div>Facultad</div>
       <div>Correo</div>
-      <div>Tutoría Recibidas</div>
+      <div>Tutorías Recibidas</div>
     </div>
 
-    {#each estudiantes as estudiante}
-      <div class="fila">
-        <div>{estudiante.nombre}</div>
-        <div>{estudiante.facultad}</div>
-        <div>{estudiante.correo}</div>
-        <div>{estudiante.horas}</div>
-      </div>
+    {#each estudiantesFiltrados as estudiante}
+      <button type="button" class="fila tarjeta" on:click={() => verEstudiante(estudiante.slug, estudiante.id_estudiante)}>
+        <span>{estudiante.nombre}</span>
+        <span>{estudiante.facultad}</span>
+        <span>{estudiante.correo}</span>
+        <span>{estudiante.tutorias_recibidas}</span>
+      </button>
     {/each}
   </div>
 </div>
@@ -78,6 +89,7 @@
   }
 
   .fila {
+    all: unset;
     display: grid;
     grid-template-columns: 2fr 1fr 3fr 1fr;
     background: white;
@@ -86,6 +98,15 @@
     box-shadow: 5px 5px 0 #f2cd6d;
     align-items: center;
     font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .tarjeta {
+    cursor: pointer;
+  }
+
+  .tarjeta:hover {
+    background-color: #f5f5f5;
   }
 
   .encabezado {

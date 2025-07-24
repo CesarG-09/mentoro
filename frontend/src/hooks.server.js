@@ -6,7 +6,10 @@ export async function handle({ event, resolve }) {
 	if (token) {
 		try {
 			const datos = jwt.verify(token, JWT_SECRET);
-			event.locals.usuario = datos;
+			event.locals.usuario = {
+				...datos,
+				token // <<-- guarda el token completo
+			};
 		} catch {
 			event.locals.usuario = null;
 		}

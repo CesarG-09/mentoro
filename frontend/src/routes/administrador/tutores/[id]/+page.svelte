@@ -2,15 +2,17 @@
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
 
+  export let data;
+
   let tutor = {
-    nombre: "Alexander Acosta",
-    materias: ["Matemática", "Química", "Ecuaciones"],
-    activas: 2,
-    completadas: 12,
-    promedio: 5,
+    nombre: data.tutor.nombre,
+    materias: data.tutor.materias,
+    activas: data.tutor.tutorias_activas,
+    completadas: data.tutor.tutorias_completadas,
+    promedio: data.tutor.calificacion,
     tutoriasPorMes: {
-      labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo"],
-      datos: [2, 4, 2, 3, 1]
+      labels: data.tutor.tutorias_por_mes.map(m => m.mes.trim()),
+      datos: data.tutor.tutorias_por_mes.map(m => m.total)
     }
   };
 
@@ -62,7 +64,7 @@
   <!-- Línea con nombre, materias y estrellas -->
   <div class="info-linea">
     <h3>{tutor.nombre}</h3>
-    <p class="materias">{tutor.materias.join(', ')}</p>
+    <p class="materias">{tutor.materias}</p>
     <p class="estrellas">{getStars(tutor.promedio)}</p>
   </div>
 

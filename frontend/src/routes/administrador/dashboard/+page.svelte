@@ -3,12 +3,27 @@
   import Chart from 'chart.js/auto';
   import { goto } from '$app/navigation';
 
-  let estudiantesRegistrados = 55;
-  let tutoresActivos = 24;
-  let sesionesCompletadas = 39;
+  export let data;
+  console.log()
+
+  let estudiantesRegistrados = data.totalEstudiantes.count;
+  let tutoresActivos = data.totalTutores.count;
+  let sesionesCompletadas = data.totalReservas.count;
 
   let lineChart;
   let barChart;
+
+  const reservasPorMes = {
+      labels: data.graficaVs.map(r => r.mes.trim()),
+      realizadas: data.graficaVs.map(r => r.realizadas),
+      aceptadas: data.graficaVs.map(r => r.aceptadas),
+      rechazadas: data.graficaVs.map(r => r.rechazadas)
+  };
+
+  const solicitudesMaterias = {
+    labels: data.graficaMaterias.map(r => r.materia.trim()),
+    datos: data.graficaMaterias.map(r => r.total)
+  }
 
   onMount(() => {
     const canvasLine = document.getElementById('lineChart');
@@ -19,20 +34,27 @@
       lineChart = new Chart(ctxLine, {
         type: 'line',
         data: {
-          labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
+          labels: reservasPorMes.labels,
           datasets: [
             {
-              label: 'Tutores',
-              data: [18, 26, 28, 35, 36],
+              label: 'Realizadas',
+              data: reservasPorMes.realizadas,
+              borderColor: '#008000',
+              backgroundColor: '#008000',
+              tension: 0.4
+            },
+            {
+              label: 'Aceptadas',
+              data: reservasPorMes.aceptadas,
               borderColor: '#FBBF24',
               backgroundColor: '#FBBF24',
               tension: 0.4
             },
             {
-              label: 'Estudiantes',
-              data: [6, 14, 15, 23, 25],
-              borderColor: '#1E1E2F',
-              backgroundColor: '#1E1E2F',
+              label: 'Rechazadas',
+              data: reservasPorMes.rechazadas,
+              borderColor: '#B90E0A',
+              backgroundColor: '#B90E0A',
               tension: 0.4
             }
           ]
@@ -53,10 +75,10 @@
       barChart = new Chart(ctxBar, {
         type: 'bar',
         data: {
-          labels: ['Cálculo', 'Física', 'Química', 'Ecuaciones', 'Inglés'],
+          labels: solicitudesMaterias.labels,
           datasets: [{
             label: 'Solicitudes en Mayo',
-            data: [5, 11, 20, 23, 29],
+            data: solicitudesMaterias.datos,
             backgroundColor: '#FBBF24'
           }]
         },
@@ -104,7 +126,7 @@
 
   <div class="charts">
     <div class="chart">
-      <h3>Solicitudes por Mes</h3>
+      <h3>Solicitudes Aceptadas Vs Rechazadas</h3>
       <canvas id="lineChart" width="400" height="250"></canvas>
     </div>
     <div class="chart">
