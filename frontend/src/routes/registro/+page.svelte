@@ -86,17 +86,21 @@
   }
 
   function agregarMateria() {
-    const materia = materiaInput.trim();
-    const existe = materias.some(m => m.de_materia.toLowerCase() === materia.toLowerCase());
-    if (materia && existe && !materiasSelected.includes(materia)) {
-      materiasSelected = [...materiasSelected, materia];
+    const materiaNombre = materiaInput.trim();
+    const existe = materias.some(m => m.de_materia.toLowerCase() === materiaNombre.toLowerCase());
+    const yaExiste = materiasSelected.some(m => m.nombre === materiaNombre);
+
+    if (materiaNombre && existe && !yaExiste) {
+      materiasSelected = [...materiasSelected, { nombre: materiaNombre, precio: '' }];
     }
+
     materiaInput = '';
   }
 
-  function eliminarMateria(materia) {
-    materiasSelected = materiasSelected.filter(m => m !== materia);
+  function eliminarMateria(index) {
+    materiasSelected = materiasSelected.filter((_, i) => i !== index);
   }
+
 
   async function getCarreras() {
     try {
@@ -259,12 +263,27 @@
           {/if}
 
           <div class="materias-lista">
-            {#each materiasSelected as materia}
-              <div class="materia-chip">
-                {materia}
-                <button type="button" on:click={() => eliminarMateria(materia)}>✕</button>
+            {#if materiasSelected.length > 0}
+              <div class="materias-lista-vertical">
+                <label>Materias agregadas:</label>
+                {#each materiasSelected as materia, index}
+                <div class="materia-item">
+                  <div class="materia-nombre">📘 {materia.nombre}</div>
+                  <div class="materia-actions">
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="Precio por hora"
+                      bind:value={materia.precio}
+                      class="precio-input"
+                    />
+                    <span class="moneda">$/hr</span>
+                    <button type="button" on:click={() => eliminarMateria(index)}>✕</button>
+                  </div>
+                </div>
+                {/each}
               </div>
-            {/each}
+            {/if}
           </div>
         {/if}
 
@@ -491,6 +510,7 @@
     font-size: 0.9rem;
     font-weight: bold;
     height: 40px;
+    gap: 0.5rem;
   }
 
   .materia-chip button {
@@ -501,6 +521,20 @@
     cursor: pointer;
     font-weight: bold;
   }
+
+  .precio-input {
+    width: 100px;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  .moneda {
+    font-size: 0.9rem;
+    color: #ccc;
+  }
+
 
   .dias-circulos {
     display: flex;
@@ -580,5 +614,62 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
+
+  .materias-lista-vertical {
+    width: 100%;
+    background-color: #F9F6EF;
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .materia-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    background: white;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: none; /* quita sombra para que se parezca más al de días */
+  }
+
+
+  .materia-nombre {
+    flex: 1;
+  }
+
+  .materia-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem; /* más ajustado */
+  }
+
+
+  .precio-input {
+    width: 90px;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  .moneda {
+    font-size: 0.9rem;
+    color: #ccc;
+  }
+
+  .materia-actions button {
+    background: none;
+    border: none;
+    color: #ce1414;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+
 
 </style>
