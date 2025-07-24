@@ -101,7 +101,6 @@
     materiasSelected = materiasSelected.filter((_, i) => i !== index);
   }
 
-
   async function getCarreras() {
     try {
       const facultadObj = facultades.find(f => f.id_facultad == id_facultad);
@@ -265,9 +264,9 @@
           <div class="materias-lista">
             {#if materiasSelected.length > 0}
               <div class="materias-lista-vertical">
-                <label>Materias agregadas:</label>
+                <label for="materia-item">Materias agregadas:</label>
                 {#each materiasSelected as materia, index}
-                <div class="materia-item">
+                <div id="materia-item" class="materia-item">
                   <div class="materia-nombre">📘 {materia.nombre}</div>
                   <div class="materia-actions">
                     <input
@@ -276,6 +275,7 @@
                       placeholder="Precio por hora"
                       bind:value={materia.precio}
                       class="precio-input"
+                      required
                     />
                     <span class="moneda">$/hr</span>
                     <button type="button" on:click={() => eliminarMateria(index)}>✕</button>
@@ -500,28 +500,6 @@
     gap: 0.5rem;
   }
 
-  .materia-chip {
-    display: flex;
-    align-items: center;
-    background-color: #1E1E2F;
-    color: #F2EEE6;
-    padding: 0.0005rem 0.6rem;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    height: 40px;
-    gap: 0.5rem;
-  }
-
-  .materia-chip button {
-    background: none;
-    border: none;
-    color: #F2EEE6;
-    margin-left: 0.3em;
-    cursor: pointer;
-    font-weight: bold;
-  }
-
   .precio-input {
     width: 100px;
     padding: 0.25rem;
@@ -637,7 +615,6 @@
     box-shadow: none; /* quita sombra para que se parezca más al de días */
   }
 
-
   .materia-nombre {
     flex: 1;
   }
@@ -647,7 +624,6 @@
     align-items: center;
     gap: 0.3rem; /* más ajustado */
   }
-
 
   .precio-input {
     width: 90px;
@@ -669,7 +645,4 @@
     font-weight: bold;
     cursor: pointer;
   }
-
-
-
 </style>

@@ -1,32 +1,7 @@
 
 <script>
-    import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
-    $: pathname = $page.url.pathname;
-
-    function cerrarSesion() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
-        goto('/login');
-    }
-
-    function esActiva(ruta) {
-        return pathname.startsWith(ruta);
-    }
+    
 </script>
-
-<!-- Navbar -->
-<div class="nav-bar">
-    <div class="nav-links">
-        <a href="/administrador/dashboard" class:active={esActiva('/administrador/dashboard')}>Dashboard</a>
-        <a href="/administrador/tutores" class:active={esActiva('/administrador/tutores')}>Tutores</a>
-        <a href="/administrador/estudiantes" class:active={esActiva('/administrador/estudiantes')}>Estudiantes</a>
-    </div>
-    <div class="user-info">
-        <span>Hola, <strong>admin@mentoro.pa</strong></span>
-        <button on:click={cerrarSesion}>Cerrar sesión</button>
-    </div>
-</div>
 
 <!-- Materias en tendencia -->
 <section>
@@ -112,55 +87,14 @@
     <p>&copy; 2024 Mentoro. Todos los derechos reservados.</p>
 </footer>
     
-
-
 <style>
-    .nav-bar {
-        background-color: #1E1E2F;
-        color: white;
-        padding: 1rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .nav-links a {
-        color: white;
-        margin-right: 1rem;
-        text-decoration: none;
-    }
-
-    .nav-links a.active {
-        font-weight: bold;
-        border-bottom: 2px solid white;
-        padding-bottom: 1.2rem;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .user-info button {
-        background-color: #FBBF24;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-        color:#1E1E2F;
-    }
-
-    body {
-        background-color: #F5F5F5;
-        font-family: 'Arial', sans-serif;
-        color:#1E1E2F;
+    :global(body) {
         margin: 0;
-        padding: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #F2EEE6;
     }
 
-    h1, h2 {
+    h2 {
         color: #1E1E2F;
         padding: 1rem;
     }
@@ -297,7 +231,6 @@
     .fila button:hover {
         background-color: #FFA500;
     }
-
 
     footer {
         text-align: center;

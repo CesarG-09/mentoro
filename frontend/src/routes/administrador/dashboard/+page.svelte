@@ -1,10 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
-  import { goto } from '$app/navigation';
 
   export let data;
-  console.log()
 
   let estudiantesRegistrados = data.totalEstudiantes.count;
   let tutoresActivos = data.totalTutores.count;
