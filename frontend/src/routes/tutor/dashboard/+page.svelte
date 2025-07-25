@@ -63,6 +63,9 @@
 <svelte:head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts/dist/apexcharts.css">
 </svelte:head>
+    <div class="header">
+      <h2>Estadísticas del Tutor</h2>
+    </div>
   <div class="grid">
     <div class="tarjeta">⭐ Valoración Promedio<p class="valor">{estadisticas.valoracionPromedio} / 5</p></div>
     <div class="tarjeta">✅ Aceptadas<p class="valor">{estadisticas.tutoriasAceptadas}</p></div>
@@ -79,16 +82,30 @@
 </div>
 
 <style>
-  
+   :global(body) {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #F2EEE6;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    max-width: 1200px;
+    padding-left: 5rem;
 
+  }
   .contenedor {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 5rem;
+    gap: 3rem;
     justify-content: center;
     max-width: 1800px;
     min-width: 500px;
-    padding: 1rem 7rem;
+    padding: 1rem;
+    padding-left: 5rem;
+    padding-right: 5rem;
   }
 
 
@@ -97,6 +114,8 @@
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem;
     margin-bottom: 3rem;
+    padding-left: 5rem;
+    padding-right: 5rem;
   }
 
   .tarjeta {
@@ -116,13 +135,10 @@
   }
 
  .grafico {
-  width: 100%;
   background: white;
   border-radius: 8px;
   padding: 0.8rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-  min-height: 200px;
-  max-height: 500px;
 }
   
 </style>

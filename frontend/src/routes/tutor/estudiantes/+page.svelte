@@ -49,13 +49,17 @@
     }
   }
 </script>
-
+      <div class="header">
+          <h2>Mis Tutorias</h2>
+      </div>
 <div class="panel">
   <section>
     <h3>📬 Solicitudes pendientes ({solicitudes.length})</h3>
     {#if solicitudes.length === 0}
       <p>No tienes solicitudes pendientes.</p>
     {:else}
+
+    
       <div class="grid">
         {#each solicitudes as s}
           <div class="tarjeta solicitud">
@@ -94,6 +98,14 @@
 </div>
 
 <style>
+    .header {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    max-width: 1200px;
+    padding-left: 5rem;
+
+  }
   .panel {
     max-width: 1000px;
     margin: auto;
