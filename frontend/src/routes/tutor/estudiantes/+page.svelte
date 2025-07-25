@@ -1,10 +1,4 @@
 <script>
-<<<<<<< Updated upstream
-    import PanelTutorVerEstudiante from './PanelTutorVerEstudiante.svelte';
-</script>
-
-<PanelTutorVerEstudiante />
-=======
   let solicitudes = [
     {
       id: 1,
@@ -175,4 +169,3 @@
     color: white;
   }
 </style>
->>>>>>> Stashed changes

@@ -1,10 +1,4 @@
 <script>
-<<<<<<< Updated upstream
-    import PanelTutorEvaluacion from './PanelTutorEvaluacion.svelte';
-</script>
-
-<PanelTutorEvaluacion />
-=======
   let filtroEstado = '';
   let criterioPrincipal = 'fecha';
 
@@ -259,4 +253,3 @@
     transition: background-color 0.2s ease;
   }
 </style>
->>>>>>> Stashed changes

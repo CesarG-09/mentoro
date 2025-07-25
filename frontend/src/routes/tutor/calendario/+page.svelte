@@ -1,10 +1,4 @@
 <script>
-<<<<<<< Updated upstream
-  import PanelTutorCalendario from './PanelTutorCalendario.svelte';
-</script>
-
-<PanelTutorCalendario/>
-=======
   import { onMount } from 'svelte';
   import { Calendar } from '@fullcalendar/core';
   import dayGridPlugin from '@fullcalendar/daygrid';
@@ -186,4 +180,3 @@
     background-color: #facc15;
   }
 </style>
->>>>>>> Stashed changes

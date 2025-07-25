@@ -1,10 +1,4 @@
 <script>
-<<<<<<< Updated upstream
-    import PanelTutorEstadisticas from './PanelTutorEstadisticas.svelte';
-</script>
-
-<PanelTutorEstadisticas />
-=======
   import { onMount } from 'svelte';
 
   let graficaAprobados;
@@ -148,4 +142,3 @@
 }
   
 </style>
->>>>>>> Stashed changes
