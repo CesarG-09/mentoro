@@ -1,12 +1,5 @@
 <script>
   import { page } from '$app/stores';
-
-  const titulos = {
-    '/tutor/dashboard': 'Estadísticas del Tutor',
-    '/tutor/mistutorias': 'Mis Tutorías',
-    '/tutor/estudiantes': 'Estudiantes Asignados',
-    '/tutor/calendario': 'Calendario de Tutorías'
-  };
 </script>
 
 <div class="layout">
@@ -17,17 +10,14 @@
       <a href="/tutor/estudiantes" class:active={$page.url.pathname === '/tutor/estudiantes'}>Estudiantes</a>
       <a href="/tutor/calendario" class:active={$page.url.pathname === '/tutor/calendario'}>Calendario</a>
     </div>
+    <div class="logo-container">
+      <img src="/single_logo.png" alt="Logo Mentoro" class="imagenlogo" />
+    </div>
     <div class="user-info">
       <span>Hola, <strong>tutor@mentoro.pa</strong></span>
       <button>Cerrar sesión</button>
     </div>
-  </div>
-
-  <div class="header">
-    <h2>{titulos[$page.url.pathname] ?? 'Panel del Tutor'}</h2>
-    <div class="logo-container">
-      <img src="/mentoro_logo.png" alt="Logo Mentoro" class="imagenlogo" />
-    </div>
+    
   </div>
 
   <!-- Aquí se insertan las páginas hijas -->
@@ -35,19 +25,21 @@
 </div>
 
 <style>
-  :global(body) {
+     :global(body) {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', sans-serif;
     background-color: #F2EEE6;
   }
-
-  .layout {
-    width: 100vw;
-    min-height: 100vh;
-    padding-bottom: 3rem;
+  .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    flex-grow: 1;
   }
-
+  .imagenlogo {
+    height: 50px;
+  }
   .nav-bar {
     background-color: #1E1E2F;
     color: white;
@@ -61,12 +53,12 @@
     color: white;
     margin-right: 1rem;
     text-decoration: none;
-    font-weight: 500;
   }
 
   .nav-links a.active {
-    border-bottom: 2px solid #FBBF24;
-    padding-bottom: 2px;
+    font-weight: bold;
+    border-bottom: 2px solid white;
+    padding-bottom: 1.2rem;
   }
 
   .user-info {
@@ -83,18 +75,5 @@
     font-weight: bold;
     cursor: pointer;
     color: #1E1E2F;
-  }
-
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem;
-    max-width: 1200px;
-    margin: auto;
-  }
-
-  .imagenlogo {
-    height: 50px;
   }
 </style>
