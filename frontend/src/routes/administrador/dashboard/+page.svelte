@@ -1,4 +1,5 @@
 <script>
+  import { transformarTexto } from '../../../utils/transformarTexto';
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
 
@@ -19,7 +20,7 @@
   };
 
   const solicitudesMaterias = {
-    labels: data.graficaMaterias.map(r => r.materia.trim()),
+    labels: data.graficaMaterias.map(r => transformarTexto(r.materia.trim())),
     datos: data.graficaMaterias.map(r => r.total)
   }
 

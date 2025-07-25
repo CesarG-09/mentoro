@@ -22,5 +22,8 @@ router.get('/grafica-materias', verificarToken, authController.graficaMaterias);
 router.get('/grafica-materias', verificarToken, authController.graficaMaterias);
 router.get('/lista-estudiantes', verificarToken, authController.listaEstudiantes);
 router.get('/ver-estudiante', verificarToken, authController.muestraEstudiante);
+router.get('/top-materias', verificarToken, authController.topMaterias);
+router.get('/top-tutores', verificarToken, authController.topTutores);
+router.get('/lista-tutorias', authController.listaTutorias);
 
 module.exports = router;

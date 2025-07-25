@@ -1,13 +1,14 @@
 <!-- FALTA MODIFICAR ANCHO DE LA PANTALLA -->
 
 <script>
+  import { transformarTexto } from '../../../utils/transformarTexto';
   import { goto } from '$app/navigation';
 
   export let data;
 
   let busqueda = '';
 
-  let tutores = data.listaTutores;
+  let tutores = data.listaTutores.map(m => ({ ...m, materias: transformarTexto(m.materias) }));
 
   $: tutoresFiltrados = tutores.filter(t =>
   t.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||

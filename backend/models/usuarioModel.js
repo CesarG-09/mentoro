@@ -155,6 +155,64 @@ async function verEstudiante(id_estudiante) {
   return resultado.rows[0];
 }
 
+async function listarTopMaterias() {
+  const resultado = await pool.query(
+    `SELECT 
+         m.de_materia AS materia,
+         m.descripcion AS descripcion,
+         COUNT(*) AS total_reservas
+     FROM Reserva r
+     JOIN Materia m ON r.id_materia = m.id_materia
+     WHERE r.estado_tutoria = 'Finalizada'
+     GROUP BY m.de_materia, m.descripcion
+     ORDER BY total_reservas DESC, m.de_materia ASC
+     LIMIT 4;`
+  );
+  return resultado.rows;
+}
+
+async function listarTopTutores() {
+  const resultado = await pool.query(
+    `SELECT 
+         CONCAT(t.nombre, ' ', t.apellido) AS nombre,
+         string_agg(DISTINCT m.de_materia, ', ') AS materias,
+         COALESCE(ROUND(AVG(e.calificacion))::INTEGER, 0) AS calificacion,
+         COUNT(r.id_reserva) AS total_finalizadas
+     FROM Tutor t
+     JOIN Tutor_materia tm ON t.id_tutor = tm.id_tutor
+     JOIN Materia m ON tm.id_materia = m.id_materia
+     LEFT JOIN Eval_tutor e ON t.id_tutor = e.id_tutor
+     JOIN Reserva r ON r.id_tutor = t.id_tutor AND r.estado_tutoria = 'Finalizada'
+     GROUP BY t.id_tutor, t.nombre, t.apellido
+     ORDER BY total_finalizadas DESC, nombre ASC
+     LIMIT 3;`
+  );
+  return resultado.rows;
+}
+
+async function listarTutorias(usuario) {
+  const resultado = await pool.query(
+    `SELECT
+         r.estado_reserva,
+         m.de_materia AS materia,
+         CONCAT(t.nombre, ' ', t.apellido) AS tutor,
+         TO_CHAR(r.fe_reserva, 'DD TMMonth YYYY') AS fecha
+     FROM Reserva r
+     JOIN Materia m ON r.id_materia = m.id_materia
+     JOIN Tutor t ON r.id_tutor = t.id_tutor
+     JOIN Estudiante e ON r.id_estudiante = e.id_estudiante
+     JOIN Usuario u ON e.id_usuario = u.id_usuario
+     WHERE u.usuario = $1
+       AND (
+             (r.estado_reserva = 'En espera' AND r.estado_tutoria = 'Pendiente')
+         OR (r.estado_reserva = 'Aceptada' AND r.estado_tutoria = 'En progreso')
+           )
+     ORDER BY r.fe_reserva ASC;`,
+     [usuario]
+  );
+  return resultado.rows;
+}
+
 module.exports = {
   registrarEstudiante,
   registrarTutor,
@@ -170,5 +228,8 @@ module.exports = {
   listarTutores,
   verTutor,
   listarEstudiantes,
-  verEstudiante
+  verEstudiante,
+  listarTopMaterias,
+  listarTopTutores,
+  listarTutorias
 };

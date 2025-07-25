@@ -1,85 +1,76 @@
 
 <script>
-    
+    import { transformarTexto } from '../../../utils/transformarTexto';
+    export let data;
+    let materias = data.topMaterias.map(m => ({ ...m, materia: transformarTexto(m.materia) }));
+
+    let tutores = data.topTutores.map(m => ({ ...m, materias: transformarTexto(m.materias) }));
+
+    let tutorias = data.tutoriasReservadas.map(m => ({ ...m, materia: transformarTexto(m.materia) }));
 </script>
 
 <!-- Materias en tendencia -->
 <section>
     <h2>Materias en tendencia</h2>
     <div class="card-container">
-        <div class="card">
-            <h2>Matemáticas</h2>
-            <img src="https://cdn-icons-png.flaticon.com/512/10782/10782050.png" alt="Imagen de Matemáticas" class="card-image">
-            <p>Introducción al álgebra, cálculo diferencial e integral.</p>
-            <button>Buscar esta materia</button>
-        </div>
-        <div class="card">
-            <h2>Física</h2>
-            <img src="https://cdn-icons-png.flaticon.com/512/10782/10782050.png" alt="Imagen de Matemáticas" class="card-image">
-            <p>Conceptos fundamentales de mecánica y termodinámica.</p>
-            <button>Buscar esta materia</button>
-        </div>
-        <div class="card">
-            <h2>Programación</h2>
-            <img src="https://cdn-icons-png.flaticon.com/512/10782/10782050.png" alt="Imagen de Matemáticas" class="card-image">
-            <p>Fundamentos de programación y estructuras de datos.</p>
-            <button>Buscar esta materia</button>
-        </div>
+        {#if materias.length > 0}
+            {#each materias as materia}
+                <div class="card">
+                    <h2>{materia.materia}</h2>
+                    <img src="https://cdn-icons-png.flaticon.com/512/10782/10782050.png" alt="Imagen Materia" class="card-image">
+                    <p>{materia.descripcion}</p>
+                    <button>Buscar esta materia</button>
+                </div>
+            {/each}
+        {/if}
+        {#if materias.length <= 0}
+            <p>No hay materias</p>
+        {/if}
     </div>
 </section>
 
-<!-- Profesores destacados -->
+<!-- tutores destacados -->
 <section>
-    <h2>Profesores en tendencia</h2>
+    <h2>tutores en tendencia</h2>
     <div class="professor-container">
-        <div class="professor-card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZyb-RdYPVFoVdjepEY1kB1TvUm-LKq9gokA&s" alt="Profesor Alberto Pérez">
-            <div>
-                <h3>Alberto Pérez</h3>
-                <p>Matemáticas</p>
-                <p>⭐⭐⭐⭐⭐</p>
-                <button>Reservar</button>
-            </div>
-        </div>
-        <div class="professor-card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZyb-RdYPVFoVdjepEY1kB1TvUm-LKq9gokA&s" alt="Profesor Laura Gómez">
-            <div>
-                <h3>Laura Gómez</h3>
-                <p>Química, Biología</p>
-                <p>⭐⭐⭐⭐</p>
-                <button>Reservar</button>
-            </div>
-        </div>
+        {#if tutores.length > 0}
+            {#each tutores as tutor}
+                <div class="professor-card">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZyb-RdYPVFoVdjepEY1kB1TvUm-LKq9gokA&s" alt="Imagen tutor">
+                    <div>
+                        <h3>{tutor.nombre}</h3>
+                        <p>{tutor.materias}</p>
+                        <p>{#each Array(tutor.calificacion) as _}⭐{/each}</p>
+                        <button>Reservar</button>
+                    </div>
+                </div>
+            {/each}
+        {/if}
+        {#if tutores.length <= 0}
+            <p>No hay tutores</p>
+        {/if}
     </div>
 </section>
 
 <!-- Tutorías reservadas -->
 <section class="reserved-tutoring">
     <h2>Tutorías reservadas</h2>
-    <div class="fila">
-        <div>Matemáticas</div>
-        <div>Alberto Pérez</div>
-        <div>10 abril 2024</div>
-        <div>
-            <button>Ver detalles</button>
-        </div>
-    </div>
-    <div class="fila">
-        <div>Programación</div>
-        <div>Carlos Ruiz</div>
-        <div>9 abril 2024</div>
-        <div>
-            <button>Ver detalles</button>
-        </div>
-    </div>
-    <div class="fila">
-        <div>Química</div>
-        <div>Laura Gómez</div>
-        <div>8 abril 2024</div>
-        <div>
-            <button>Ver detalles</button>
-        </div>
-    </div>
+    {#if tutorias.length > 0}
+        {#each tutorias as tutoria}
+            <div class="fila">
+                <div>{tutoria.materia}</div>
+                <div>{tutoria.tutor}</div>
+                <div>{tutoria.fecha}</div>
+                <div>{tutoria.estado_reserva}</div>
+                <div>
+                    <button>Ver detalles</button>
+                </div>
+            </div>
+        {/each}
+    {/if}
+    {#if tutorias.length <= 0}
+        <p>No hay tutorias pendientes</p>
+    {/if}
 </section>
 
 <!-- Footer -->
@@ -146,13 +137,13 @@
         background-color: #FFA500;
     }
 
-    /* Profesor container */
+    /* tutor container */
     .professor-container {
         display: flex;
         justify-content: space-around;
         flex-wrap: wrap;
         gap: 20px;
-        padding: 0 1rem 2rem;
+        padding: 0 1rem 0rem;
     }
 
     .professor-card {
@@ -193,18 +184,20 @@
     }
     
     .reserved-tutoring {
-        padding: 20px;
-        margin-top: 40px;
+        padding: 0px 20px 20px 20px;
         margin-left: auto;
         margin-right: auto;
         max-width: 1200px; /* Máximo ancho para la sección */
         width: 90%; /* Ajusta el ancho según sea necesario */
     }
 
+    .reserved-tutoring p{
+        text-align: center;
+    }
 
     .fila {
         display: grid;
-        grid-template-columns: 2fr 1fr 3fr 1fr; /* Define el ancho de cada columna */
+        grid-template-columns: 3fr 2fr 2fr 1fr 1.15fr; /* Define el ancho de cada columna */
         background: white;
         padding: 1rem;
         border-radius: 12px;

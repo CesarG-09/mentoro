@@ -15,18 +15,21 @@ export async function load({ locals, fetch }) {
 		Authorization: `Bearer ${token}`
 	};
 
-    /*
-
     // Llamadas necesarias al cargar la página
-    const [totalEstudRes] = await Promise.all([
-        fetch('http://localhost:3001/api/total-estudiantes', { headers })
+    const [topMateriasRes, topTutoresRes, tutoriasReservadasRes] = await Promise.all([
+        fetch('http://localhost:3001/api/top-materias', { headers }),
+		fetch('http://localhost:3001/api/top-tutores', { headers }),
+		fetch(`http://localhost:3001/api/lista-tutorias?usuario=${encodeURIComponent(locals.usuario.usuario)}`, { headers })
     ]);
 
-    const totalEstudiantesData = await totalEstudRes.json();
-
-    */
+    const topMateriasData = await topMateriasRes.json();
+	const topTutoresData = await topTutoresRes.json();
+	const tutoriasReservadasData = await tutoriasReservadasRes.json();
 
     return {
+		topMaterias: topMateriasData.materias || [],
+		topTutores: topTutoresData.tutores || [],
+		tutoriasReservadas: tutoriasReservadasData.tutorias || [],
 		usuario: locals.usuario
 	};
 }

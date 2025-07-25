@@ -1,4 +1,5 @@
 <script>
+  import { transformarTexto } from '../../../../utils/transformarTexto';
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
   export let data;
@@ -11,7 +12,7 @@
     completadas: data.estudiante.tutorias_completadas,
     horas: data.estudiante.horas_tutoria_recibidas,
     materias: {
-      labels: data.estudiante.grafica_horas_por_materia.map(m => m.materia),
+      labels: data.estudiante.grafica_horas_por_materia.map(m => transformarTexto(m.materia)),
       data: data.estudiante.grafica_horas_por_materia.map(m => m.horas)
     }
   };

@@ -1,4 +1,5 @@
 <script>
+  import { transformarTexto } from '../../../../utils/transformarTexto';
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
 
@@ -6,7 +7,7 @@
 
   let tutor = {
     nombre: data.tutor.nombre,
-    materias: data.tutor.materias,
+    materias: transformarTexto(data.tutor.materias),
     activas: data.tutor.tutorias_activas,
     completadas: data.tutor.tutorias_completadas,
     promedio: data.tutor.calificacion,
@@ -15,7 +16,7 @@
       datos: data.tutor.tutorias_por_mes.map(m => m.total)
     }
   };
-
+console.log(tutor.materias);
   let chart;
 
   onMount(() => {
