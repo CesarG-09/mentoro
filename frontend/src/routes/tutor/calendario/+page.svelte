@@ -1,5 +1,5 @@
 <script>
-  import PanelTutorCalendario from '$lib/componentes/tutor/PanelTutorCalendario.svelte';
+  import PanelTutorCalendario from './PanelTutorCalendario.svelte';
 </script>
 
 <PanelTutorCalendario/>

@@ -1,5 +1,5 @@
 <script>
-    import PanelTutorEstadisticas from '$lib/Componentes/tutor/PanelTutorEstadisticas.svelte';
+    import PanelTutorEstadisticas from './PanelTutorEstadisticas.svelte';
 </script>
 
 <PanelTutorEstadisticas />
