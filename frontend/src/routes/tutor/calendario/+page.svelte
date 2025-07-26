@@ -110,7 +110,7 @@
     padding: 2rem;
     max-width: 1200px;
     padding-left: 5rem;
-
+    cursor:default;
   }
   .calendario-contenedor {
     max-width: 1000px;
@@ -119,6 +119,7 @@
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    cursor:pointer;
   }
 
   #calendario {
@@ -131,14 +132,7 @@
     color: #1E1E2F !important;
     font-weight: bold;
   }
-  .header {
-    display: flex;
-    align-items: center;
-    padding: 2rem;
-    max-width: 1200px;
-    padding-left: 5rem;
-
-  }
+  
   .panel-tutorias {
     max-width: 1000px;
     margin: 2rem auto 0;
