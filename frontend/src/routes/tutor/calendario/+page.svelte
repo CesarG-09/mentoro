@@ -8,6 +8,8 @@
   let tutoriasDelDia = [];
   let fechaSeleccionada = '';
 
+  let panelTutoriasEl;
+
   const tutorias = [
     {
       title: 'Tutoría de Cálculo',
@@ -51,13 +53,23 @@
       })),
       dateClick(info) {
         const eventos = tutorias.filter(e => e.date === info.dateStr);
-        fechaSeleccionada = new Date(info.dateStr).toLocaleDateString('es-PA', {
+        // Parse date as local to avoid timezone issues
+        const [year, month, day] = info.dateStr.split('-').map(Number);
+        const fechaLocal = new Date(year, month - 1, day);
+        fechaSeleccionada = fechaLocal.toLocaleDateString('es-PA', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         });
         tutoriasDelDia = eventos;
+        
+        // Scroll al panel después de actualizar los datos
+        setTimeout(() => {
+          if (panelTutoriasEl) {
+            panelTutoriasEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
       }
     });
 
@@ -67,6 +79,22 @@
   function alternarAsistencia(indice) {
     tutoriasDelDia[indice].asistido = !tutoriasDelDia[indice].asistido;
   }
+
+  function capitalizeWords(str) {
+    // Capitaliza la primera letra de cada palabra, excepto "de"
+    if (!str) return '';
+    return str
+      .split(' ')
+      .map((word, idx) => {
+        if (word.toLocaleLowerCase('es-ES') === 'de') {
+          return 'de';
+        }
+        // Capitaliza la primera letra, el resto minúsculas
+        return word.charAt(0).toLocaleUpperCase('es-ES') + word.slice(1).toLocaleLowerCase('es-ES');
+      })
+      .join(' ');
+  }
+
 </script>
 
 <svelte:head>
@@ -81,27 +109,32 @@
 </div>
 
 <!-- Panel inferior -->
-{#if tutoriasDelDia.length > 0}
-  <div class="panel-tutorias">
-    <h3>Tutorías para {fechaSeleccionada}</h3>
-    <ul>
-      {#each tutoriasDelDia as t, i}
-        <li>
-          <strong>{t.title}</strong> — {t.hora}<br />
-          Tutor: {t.tutor}<br />
-          <button on:click={() => alternarAsistencia(i)}>
-            {t.asistido ? '❌ Desmarcar asistencia' : '✅ Marcar asistencia'}
-          </button>
-        </li>
-      {/each}
-    </ul>
-  </div>
-{:else if fechaSeleccionada}
-  <div class="panel-tutorias">
-    <h3>{fechaSeleccionada}</h3>
-    <p>No tienes tutorías en este día</p>
+{#if fechaSeleccionada}
+  <div
+    class="panel-tutorias"
+    style="margin-bottom: 4rem;"
+    bind:this={panelTutoriasEl}
+  >
+    <h3>{`Tutorías para el día ${capitalizeWords(fechaSeleccionada)}`}</h3>
+    {#if tutoriasDelDia.length > 0}
+      <ul>
+        {#each tutoriasDelDia as t, i}
+          <li>
+            <strong>Materia:</strong> {t.title}<br />
+            <strong>Hora:</strong> {t.hora}<br />
+            <strong>Tutor:</strong> {t.tutor}<br />
+            <button on:click={() => alternarAsistencia(i)} style="margin-top: 1rem;">
+              {t.asistido ? '❌ Desmarcar asistencia' : '✅ Marcar asistencia'}
+            </button>
+          </li>
+        {/each}
+      </ul>
+    {:else}
+      <p>No tienes tutorías en este día</p>
+    {/if}
   </div>
 {/if}
+
 
 <style>
     .header {
