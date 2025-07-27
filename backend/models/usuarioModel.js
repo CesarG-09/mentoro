@@ -157,35 +157,14 @@ async function verEstudiante(id_estudiante) {
 
 async function listarTopMaterias() {
   const resultado = await pool.query(
-    `SELECT 
-         m.de_materia AS materia,
-         m.descripcion AS descripcion,
-         COUNT(*) AS total_reservas
-     FROM Reserva r
-     JOIN Materia m ON r.id_materia = m.id_materia
-     WHERE r.estado_tutoria = 'Finalizada'
-     GROUP BY m.de_materia, m.descripcion
-     ORDER BY total_reservas DESC, m.de_materia ASC
-     LIMIT 4;`
+    `SELECT * FROM top_materias`
   );
   return resultado.rows;
 }
 
 async function listarTopTutores() {
   const resultado = await pool.query(
-    `SELECT 
-         CONCAT(t.nombre, ' ', t.apellido) AS nombre,
-         string_agg(DISTINCT m.de_materia, ', ') AS materias,
-         COALESCE(ROUND(AVG(e.calificacion))::INTEGER, 0) AS calificacion,
-         COUNT(r.id_reserva) AS total_finalizadas
-     FROM Tutor t
-     JOIN Tutor_materia tm ON t.id_tutor = tm.id_tutor
-     JOIN Materia m ON tm.id_materia = m.id_materia
-     LEFT JOIN Eval_tutor e ON t.id_tutor = e.id_tutor
-     JOIN Reserva r ON r.id_tutor = t.id_tutor AND r.estado_tutoria = 'Finalizada'
-     GROUP BY t.id_tutor, t.nombre, t.apellido
-     ORDER BY total_finalizadas DESC, nombre ASC
-     LIMIT 3;`
+    `SELECT * FROM top_tutores`
   );
   return resultado.rows;
 }
@@ -213,6 +192,36 @@ async function listarTutorias(usuario) {
   return resultado.rows;
 }
 
+async function verEstadoUsuario(id_usuario) {
+  const resultado = await pool.query(
+    `SELECT
+       u.usuario,
+       u.estado
+     FROM Usuario u
+     WHERE u.id_usuario = $1;
+     `,
+     [id_usuario]
+  );
+  return resultado.rows[0];
+}
+
+async function cambiarEstadoUsuario(estado, id_usuario) {
+  const resultado = await pool.query(
+    `UPDATE Usuario
+     SET 
+         estado = $1,
+         fe_eliminacion = CASE 
+                             WHEN $1 = 'activo' THEN NULL
+                             WHEN $1 = 'eliminado' THEN CURRENT_TIMESTAMP
+                             ELSE fe_eliminacion
+                         END
+     WHERE id_usuario = $2
+     RETURNING estado;`,
+     [estado, id_usuario]
+  );
+  return resultado.rows[0];
+}
+
 module.exports = {
   registrarEstudiante,
   registrarTutor,
@@ -231,5 +240,7 @@ module.exports = {
   verEstudiante,
   listarTopMaterias,
   listarTopTutores,
-  listarTutorias
+  listarTutorias,
+  verEstadoUsuario,
+  cambiarEstadoUsuario
 };

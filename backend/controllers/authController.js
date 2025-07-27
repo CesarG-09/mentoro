@@ -18,7 +18,9 @@ const {
   verEstudiante,
   listarTopMaterias,
   listarTopTutores,
-  listarTutorias
+  listarTutorias,
+  verEstadoUsuario,
+  cambiarEstadoUsuario
 } = require('../models/usuarioModel');
 
 const registroEstudiante = async (req, res) => {
@@ -478,6 +480,51 @@ const listaTutorias = async (req, res) => {
   }
 }
 
+const estadoUsuario = async (req, res) => {
+  try{
+    const id_usuario = req.query.id_usuario;
+    if (!id_usuario) {
+      return res.status(400).json({ error: 'El id_usuario es requerido' });
+    }
+
+    const resultado = await verEstadoUsuario(id_usuario);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontró el usuario' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Usuario obtenido exitosamente',
+			usuario: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener usuario:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const cambioEstadoUsuario = async (req, res) => {
+  try {
+    const { estado, id_usuario } = req.body;
+
+    if (!estado || !id_usuario) {
+      return res.status(400).json({ error: 'Estado y id_usuario son requeridos' });
+    }
+
+    const resultado = await cambiarEstadoUsuario(estado, id_usuario);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontró el usuario' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Estado cambiado exitosamente',
+			estado: resultado
+		});
+  } catch (error) {
+    console.error('Error al cambiar el estado:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
 module.exports = {
   registroEstudiante,
   registroTutor,
@@ -496,5 +543,7 @@ module.exports = {
   muestraEstudiante,
   topMaterias,
   topTutores,
-  listaTutorias
+  listaTutorias,
+  estadoUsuario,
+  cambioEstadoUsuario
 };

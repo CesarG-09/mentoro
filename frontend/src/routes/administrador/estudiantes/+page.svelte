@@ -1,5 +1,6 @@
 <script>
   import { goto } from '$app/navigation';
+  
   export let data;
 
   let busqueda = '';
@@ -13,8 +14,8 @@
     .some(m => m.trim().toLowerCase().includes(busqueda.toLowerCase()))
   );
 
-  function verEstudiante(slug, id) {
-    goto(`/administrador/estudiantes/${slug}${id}`);
+  function verEstudiante(slug, id_estudiante, id_usuario) {
+    goto(`/administrador/estudiantes/${slug}-${id_estudiante}-${id_usuario}`);
   }
 </script>
 
@@ -34,14 +35,16 @@
       <div>Facultad</div>
       <div>Correo</div>
       <div>Tutorías Recibidas</div>
+      <div>Estado</div>
     </div>
 
     {#each estudiantesFiltrados as estudiante}
-      <button type="button" class="fila tarjeta" on:click={() => verEstudiante(estudiante.slug, estudiante.id_estudiante)}>
+      <button type="button" class="fila tarjeta" on:click={() => verEstudiante(estudiante.slug, estudiante.id_estudiante, estudiante.id_usuario)}>
         <span>{estudiante.nombre}</span>
         <span>{estudiante.facultad}</span>
         <span>{estudiante.correo}</span>
         <span>{estudiante.tutorias_recibidas}</span>
+        <span>{estudiante.estado === 'activo' ? 'Activo' : 'Inactivo'}</span>
       </button>
     {/each}
   </div>
@@ -91,7 +94,7 @@
   .fila {
     all: unset;
     display: grid;
-    grid-template-columns: 2fr 1fr 3fr 1fr;
+    grid-template-columns: 2fr 1fr 3fr 1fr 1fr;
     background: white;
     padding: 1rem;
     border-radius: 12px;

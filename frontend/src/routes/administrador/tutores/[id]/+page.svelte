@@ -1,9 +1,11 @@
 <script>
   import { transformarTexto } from '../../../../utils/transformarTexto';
+  import { enhance } from '$app/forms';
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
 
   export let data;
+  let estado = data.usuario.estado;
 
   let tutor = {
     nombre: data.tutor.nombre,
@@ -16,7 +18,7 @@
       datos: data.tutor.tutorias_por_mes.map(m => m.total)
     }
   };
-console.log(tutor.materias);
+
   let chart;
 
   onMount(() => {
@@ -50,7 +52,20 @@ console.log(tutor.materias);
     }
   });
 
-  const getStars = (count) => Array(count).fill('★').join('');
+  function handleResult({ form, data, cancel }) {
+    return async ({ result, error, update }) => {
+      if (error) {
+        console.error('Error en acción', result.data);
+      } else if (result) {
+        console.log('Action exitosa', result.data);
+        estado = result.data.estado;
+        update(result);
+        if (result.type === 'failure') {
+          console.error('Error en acción', result.data);
+        }
+      }
+    };
+  }
 </script>
 
 <!-- Contenido -->
@@ -66,7 +81,17 @@ console.log(tutor.materias);
   <div class="info-linea">
     <h3>{tutor.nombre}</h3>
     <p class="materias">{tutor.materias}</p>
-    <p class="estrellas">{getStars(tutor.promedio)}</p>
+    <form method="POST" use:enhance={handleResult}>
+      <button
+        type="submit"
+        class="toggle-switch {estado}"
+        aria-label={estado === 'activo' ? 'Activo' : 'Inactivo'}
+        >
+        {estado === 'activo' ? 'Activo' : 'Inactivo'}
+        <input type="hidden" name="estado" value={estado}>
+        <span class="circle"></span>
+      </button>
+    </form>
   </div>
 
   <!-- Tarjetas y gráfico -->
@@ -100,6 +125,56 @@ console.log(tutor.materias);
     background-color: #F2EEE6;
   }
 
+  .toggle-switch {
+    position: relative;
+    width: 110px;
+    height: 35px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    color: #1E1E2F; /* texto */
+    background-color: #F2EEE6;
+    padding: 1px 0px 0px 15px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+    text-align: left;
+  }
+
+  .toggle-switch:focus {
+    outline: none;
+  }
+
+  .toggle-switch .circle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+
+  /* Estado activo */
+  .toggle-switch.activo {
+    background-color: #FBBF24;
+    color: #1E1E2F;
+  }
+
+  .toggle-switch.eliminado {
+    text-align: right;
+    padding-right: 15px;
+    transition: transform 0.3s ease;
+  }
+
+  .toggle-switch.activo .circle {
+    transform: translateX(74px);
+    background-color: #F2EEE6;
+  }
+
   .contenido {
     padding: 2rem 4rem;
     max-width: 1400px;
@@ -127,12 +202,12 @@ console.log(tutor.materias);
   }
 
   .info-linea {
-    display: flex;
+    display: grid;
     justify-content: space-between;
     align-items: center;
     margin: 1rem 0 2rem;
     gap: 2rem;
-    flex-wrap: wrap;
+    grid-template-columns: 0.4fr 3fr 0.3fr;
   }
 
   .info-linea h3 {
@@ -142,14 +217,6 @@ console.log(tutor.materias);
 
   .materias {
     text-align: center;
-    margin: 0;
-    flex: 1;
-  }
-
-  .estrellas {
-    text-align: right;
-    color: gold;
-    font-size: 1.2rem;
     margin: 0;
     flex: 1;
   }
