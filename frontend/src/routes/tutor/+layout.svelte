@@ -65,6 +65,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    cursor:default;
   }
 
   .user-info button {

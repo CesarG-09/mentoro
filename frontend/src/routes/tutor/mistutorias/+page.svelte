@@ -1,255 +1,172 @@
 <script>
-  let filtroEstado = '';
-  let criterioPrincipal = 'fecha';
-
-  let ordenNombreAscendente = true;
-  let ordenMateriaAscendente = true;
-  let ordenFechaReciente = true;
-
-  let estudiantes = [
+  let solicitudes = [
     {
-      nombre: 'María Gómez',
-      materia: 'Cálculo I',
-      estado: 'Por evaluar',
-      comentario: '',
-      fechaEvaluacion: '2025-07-14'
+      id: 1,
+      estudiante: 'Carlos Ruiz',
+      materia: 'Matemáticas',
+      horario: 'Lunes 10:00 AM'
     },
     {
-      nombre: 'Luis Navarro',
-      materia: 'Programación',
-      estado: 'Reprobado',
-      comentario: '',
-      fechaEvaluacion: '2025-07-16'
-    },
-    {
-      nombre: 'Sofía Díaz',
-      materia: 'Química',
-      estado: 'Aprobado',
-      comentario: '',
-      fechaEvaluacion: '2025-07-15'
+      id: 2,
+      estudiante: 'Ana Torres',
+      materia: 'Historia',
+      horario: 'Miércoles 3:00 PM'
     }
   ];
 
-  const opcionesEstado = ['Aprobado', 'Reprobado', 'Por evaluar'];
-
-  function obtenerColor(estado) {
-    if (estado === 'Aprobado') return '#10B981';
-    if (estado === 'Reprobado') return '#EF4444';
-    return '#9CA3AF';
-  }
-
-  function guardarEvaluacion(estudiante) {
-    alert(`✅ Evaluación guardada para ${estudiante.nombre} — Estado: ${estudiante.estado}`);
-  }
-
-  function alternarOrdenNombre() {
-    criterioPrincipal = 'nombre';
-    ordenNombreAscendente = !ordenNombreAscendente;
-  }
-
-  function alternarOrdenMateria() {
-    criterioPrincipal = 'materia';
-    ordenMateriaAscendente = !ordenMateriaAscendente;
-  }
-
-  function alternarOrdenFecha() {
-    criterioPrincipal = 'fecha';
-    ordenFechaReciente = !ordenFechaReciente;
-  }
-
-  $: comparar = (a, b) => {
-    switch (criterioPrincipal) {
-      case 'nombre':
-        return ordenNombreAscendente
-          ? a.nombre.localeCompare(b.nombre)
-          : b.nombre.localeCompare(a.nombre);
-      case 'materia':
-        return ordenMateriaAscendente
-          ? a.materia.localeCompare(b.materia)
-          : b.materia.localeCompare(a.materia);
-      case 'fecha':
-      default:
-        const fechaA = new Date(a.fechaEvaluacion).getTime();
-        const fechaB = new Date(b.fechaEvaluacion).getTime();
-        return ordenFechaReciente ? fechaB - fechaA : fechaA - fechaB;
+  let activas = [
+    {
+      id: 101,
+      estudiante: 'Luis Navarro',
+      materia: 'Programación',
+      horario: 'Martes 2:00 PM'
+    },
+    {
+      id: 102,
+      estudiante: 'Sofía Díaz',
+      materia: 'Química',
+      horario: 'Jueves 9:00 AM'
     }
-  };
+  ];
 
-  $: estudiantesFiltrados = estudiantes
-    .filter(e => !filtroEstado || e.estado === filtroEstado)
-    .slice()
-    .sort(comparar);
+  function aceptarSolicitud(id) {
+    if (confirm('¿Estás seguro de aceptar esta tutoría?')) {
+      const solicitud = solicitudes.find(s => s.id === id);
+      activas = [...activas, solicitud];
+      solicitudes = solicitudes.filter(s => s.id !== id);
+    }
+  }
+
+  function rechazarSolicitud(id) {
+    if (confirm('¿Estás seguro de rechazar esta solicitud?')) {
+      solicitudes = solicitudes.filter(s => s.id !== id);
+    }
+  }
+
+  function cancelarTutoría(id) {
+    if (confirm('¿Estás seguro de cancelar esta tutoría?')) {
+      activas = activas.filter(t => t.id !== id);
+    }
+  }
 </script>
-    <div class="header">
-      <h2>Evaluar Tutorías</h2>
-    </div>
-<!-- Filtros -->
-<div class="filtros">
-  <label>
-    🟢 Estado:
-    <select bind:value={filtroEstado}>
-      <option value="">Todos</option>
-      {#each opcionesEstado as opcion}
-        <option value={opcion}>{opcion}</option>
-      {/each}
-    </select>
-  </label>
-  <button on:click={alternarOrdenFecha}>📅 Fecha {ordenFechaReciente ? '🔽' : '🔼'}</button>
-  <button on:click={alternarOrdenNombre}>🔠 Nombre {ordenNombreAscendente ? '🔼' : '🔽'}</button>
-  <button on:click={alternarOrdenMateria}>📘 Materia {ordenMateriaAscendente ? '🔼' : '🔽'}</button>
-</div>
-
-<!-- 👥 Evaluaciones -->
-<div class="contenedor-evaluaciones">
-  {#each estudiantesFiltrados as est}
-    <div class="tarjeta-evaluacion" style="border-left: 6px solid {obtenerColor(est.estado)};">
-      <div class="tarjeta-encabezado">
-        <h3>{est.materia} — {est.nombre}</h3>
-        <select bind:value={est.estado}>
-          {#each opcionesEstado as opcion}
-            <option value={opcion}>{opcion}</option>
-          {/each}
-        </select>
+      <div class="header">
+          <h2>Mis Tutorias</h2>
       </div>
+<div class="panel">
+  <section>
+    <h3>📬 Solicitudes pendientes ({solicitudes.length})</h3>
+    {#if solicitudes.length === 0}
+      <p>No tienes solicitudes pendientes.</p>
+    {:else}
 
-      <div class="fecha-evaluacion">
-        📅 Evaluación: {new Date(est.fechaEvaluacion).toLocaleDateString('es-ES', {
-          year: 'numeric', month: 'long', day: 'numeric'
-        })}
+    
+      <div class="grid">
+        {#each solicitudes as s}
+          <div class="tarjeta solicitud">
+            <h4>{s.materia}</h4>
+            <p>👨‍🎓 Estudiante: <strong>{s.estudiante}</strong></p>
+            <p>🕒 Horario: <strong>{s.horario}</strong></p>
+            <div class="acciones">
+              <button class="aceptar" on:click={() => aceptarSolicitud(s.id)}>✅ Aceptar</button>
+              <button class="rechazar" on:click={() => rechazarSolicitud(s.id)}>❌ Rechazar</button>
+            </div>
+          </div>
+        {/each}
       </div>
+    {/if}
+  </section>
 
-      <label>
-        Comentario del tutor:
-        <textarea bind:value={est.comentario} rows="3" placeholder="Escribe tu comentario..."></textarea>
-      </label>
-
-      <button on:click={() => guardarEvaluacion(est)}>Guardar evaluación</button>
-    </div>
-  {/each}
+  <section>
+    <h3>🔔 Tutorías activas ({activas.length})</h3>
+    {#if activas.length === 0}
+      <p>No tienes tutorías activas.</p>
+    {:else}
+      <div class="grid">
+        {#each activas as t}
+          <div class="tarjeta activa">
+            <h4>{t.materia}</h4>
+            <p>👨‍🎓 Estudiante: <strong>{t.estudiante}</strong></p>
+            <p>🕒 Horario: <strong>{t.horario}</strong></p>
+            <div class="acciones">
+              <button class="cancelar" on:click={() => cancelarTutoría(t.id)}>🔴 Cancelar</button>
+            </div>
+          </div>
+        {/each}
+      </div>
+    {/if}
+  </section>
 </div>
 
 <style>
-  :global(body) {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #F2EEE6;
-  }
     .header {
     display: flex;
     align-items: center;
     padding: 2rem;
     max-width: 1200px;
     padding-left: 5rem;
-
+    cursor:default;
   }
-  .filtros {
+  .panel {
     max-width: 1000px;
-    margin: 0 auto;
-
-    display: flex;
-    gap: 0.3rem;
-    flex-wrap: wrap;
-    align-items: center;
-    
-  }
-
-  .filtros button {
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    background-color: white;
-    font-weight: bold;
-    color: #1E1E2F;
-    cursor: pointer;
-    height: 40px;
-    display: flex;
-
-  }
-
-  .filtros select {
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    height: 40px;
-    background-color: white;
-    font-weight: bold;
-    cursor: pointer;
-    align-items: center;
-  }
-
-  .filtros label select {
-    padding: 0.4rem 0.8rem;
-    margin-left: 0.5rem;
-    border: none;
-    font-weight: bold;
-    background-color: white;
-    border: 1px solid #ccc;
-  }
-
-  .contenedor-evaluaciones {
-    max-width: 1000px;
-    margin: 0 auto;
+    margin: auto;
     padding: 2rem;
-    display: grid;
-    gap: 2rem;
+    cursor:default;
   }
 
-  .tarjeta-evaluacion {
+  section {
+    margin-bottom: 3rem;
+  }
+
+  h3 {
+    margin-bottom: 1rem;
+  }
+
+  .grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .tarjeta {
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
 
-  .tarjeta-encabezado {
+  .tarjeta h4 {
+    margin-bottom: 0.5rem;
+  }
+
+  .tarjeta p {
+    margin: 0.3rem 0;
+  }
+
+  .acciones {
+    margin-top: 1rem;
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .fecha-evaluacion {
-    font-size: 0.95rem;
-    color: #4B5563;
-    margin-bottom: 0.5rem;
-  }
-
-  textarea {
-    width: 100%;
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    resize: vertical;
-    font-family: inherit;
-    margin-top: 0.5rem;
+    gap: 0.5rem;
   }
 
   button {
-    margin-top: 1rem;
-    background-color: #FBBF24;
-    padding: 0.5rem 1.2rem;
+    padding: 0.4rem 0.8rem;
     border: none;
     border-radius: 6px;
     font-weight: bold;
-    color: #1E1E2F;
     cursor: pointer;
-    transition: background-color 0.2s ease;
   }
 
-  button:hover {
-    background-color: #facc15;
+  .aceptar {
+    background-color: #10B981;
+    color: white;
   }
 
-  select {
-    margin-top: 1rem;
-    background-color:  white;
-    padding: 0.5rem 1.2rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-weight: bold;
-    color: #1E1E2F;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  .rechazar {
+    background-color: #6B7280;
+    color: white;
+  }
+
+  .cancelar {
+    background-color: #EF4444;
+    color: white;
   }
 </style>

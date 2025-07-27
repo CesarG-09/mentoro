@@ -17,8 +17,8 @@
     .some(m => m.trim().toLowerCase().includes(busqueda.toLowerCase()))
   );
 
-  function verTutor(slug, id) {
-    goto(`/administrador/tutores/${slug}${id}`);
+  function verTutor(slug, id_tutor, id_usuario) {
+    goto(`/administrador/tutores/${slug}-${id_tutor}-${id_usuario}`);
   }
 </script>
 
@@ -42,13 +42,15 @@
   <div class="table-header">
     <span><strong>Nombre</strong></span>
     <span><strong>Materias</strong></span>
+    <span><strong>Estado</strong></span>
     <span><strong>Calificación</strong></span>
   </div>
 
   {#each tutoresFiltrados as tutor}
-    <button type="button" class="tutor-card clickable" on:click={() => verTutor(tutor.slug, tutor.id_tutor)}>
+    <button type="button" class="tutor-card clickable" on:click={() => verTutor(tutor.slug, tutor.id_tutor, tutor.id_usuario)}>
       <span>{tutor.nombre}</span>
       <span>{tutor.materias}</span>
+      <span>{tutor.estado === 'activo' ? 'Activo' : 'Inactivo'}</span>
       <span>
         {#each Array(tutor.calificacion) as _}
           ⭐
@@ -76,7 +78,6 @@
     background-color: white;
     border-bottom: 1px solid #ddd;
     align-items: center;
-    width: 100%;
     cursor: pointer;
     transition: background-color 0.2s;
     text-align: left;
@@ -118,11 +119,12 @@
   .table-header,
   .tutor-card {
     display: grid;
-    grid-template-columns: 1.5fr 3fr 1.5fr;
+    grid-template-columns: 1fr 3fr 0.7fr 0.7fr;
     padding: 1rem 2rem;
     background-color: white;
     border-bottom: 1px solid #ddd;
     align-items: center;
+    width: 95%;
   }
 
   .table-header {
