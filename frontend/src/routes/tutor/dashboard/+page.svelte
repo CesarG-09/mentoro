@@ -94,14 +94,14 @@
     padding: 2rem;
     max-width: 1200px;
     padding-left: 5rem;
-
+    cursor:default;
   }
   .contenedor {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 3rem;
     justify-content: center;
-    max-width: 1800px;
+    max-width: 10000px;
     min-width: 500px;
     padding: 1rem;
     padding-left: 5rem;
@@ -125,6 +125,7 @@
     text-align: center;
     font-weight: bold;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    cursor:default;
   }
 
   .valor {
