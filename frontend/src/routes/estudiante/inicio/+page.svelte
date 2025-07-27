@@ -10,7 +10,7 @@
 </script>
 
 <!-- Materias en tendencia -->
-<section>
+<section class="contenido-limitado">
     <h2>Materias en tendencia</h2>
     <div class="card-container">
         {#if materias.length > 0}
@@ -30,8 +30,8 @@
 </section>
 
 <!-- tutores destacados -->
-<section>
-    <h2>tutores en tendencia</h2>
+<section class="contenido-limitado">
+    <h2>Tutores en tendencia</h2>
     <div class="professor-container">
         {#if tutores.length > 0}
             {#each tutores as tutor}
@@ -100,10 +100,10 @@
     }
 
     .card {
+        padding:20px 20px 20px 20px;
         background-color: #FFFFFF;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
         border-radius: 10px;
-        padding: 20px;
         text-align: center;
         flex: 1 1 30%;
         min-width: 280px;
@@ -121,11 +121,12 @@
 
     .card h2 {
         color:#1E1E2F;
+        margin-top: 0.05rem;
     }
 
     .card button {
         background-color: #FFBF00;
-        color: white;
+        color: black;
         padding: 10px 20px;
         border: none;
         border-radius: 5px;
@@ -172,7 +173,7 @@
 
     .professor-card button {
         background-color: #FFBF00;
-        color: white;
+        color: black;
         padding: 8px 16px;
         border: none;
         border-radius: 5px;
@@ -187,8 +188,8 @@
         padding: 0px 20px 20px 20px;
         margin-left: auto;
         margin-right: auto;
-        max-width: 1200px; /* Máximo ancho para la sección */
-        width: 90%; /* Ajusta el ancho según sea necesario */
+        max-width: 1200px; 
+        width: 90%; 
     }
 
     .reserved-tutoring p{
@@ -197,14 +198,14 @@
 
     .fila {
         display: grid;
-        grid-template-columns: 3fr 2fr 2fr 1fr 1.15fr; /* Define el ancho de cada columna */
+        grid-template-columns: 3fr 2fr 2fr 1fr 1.15fr; 
         background: white;
         padding: 1rem;
         border-radius: 12px;
         box-shadow: 5px 5px 0 #f2cd6d;
         align-items: center;
         font-size: 1.1rem;
-        margin-bottom: 10px; /* Espacio entre filas */
+        margin-bottom: 10px; 
     }
 
     .fila div {
@@ -231,4 +232,12 @@
         color: white;
         padding: 15px;
     }
+
+    .contenido-limitado {
+    max-width: 1200px;
+    width: 90%;
+    margin: 0 auto;
+    padding: 20px 0;
+    }
+
 </style>
