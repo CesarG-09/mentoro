@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import Datepicker from 'flowbite-datepicker/Datepicker';
 
   let fechaSeleccionada = '';
@@ -12,6 +12,8 @@
 
   const hoy = new Date('2025-07-28'); // Cambiar a new Date() en producción
   let fechaMinima = hoy.toISOString().split('T')[0];
+
+  let picker;
 
   function actualizarDisponibilidad() {
     const franjas = [
@@ -48,14 +50,30 @@
   }
 
   onMount(() => {
-    const picker = new Datepicker(document.getElementById('datepickerEl'), {
+    const input = document.getElementById('datepickerEl');
+    picker = new Datepicker(input, {
       format: 'yyyy-mm-dd',
       minDate: fechaMinima,
-      autohide: true,
+      autohide: false,
       todayHighlight: false,
     });
 
-    document.getElementById('datepickerEl').addEventListener('changeDate', (e) => {
+    const handleOutsideClick = (event) => {
+      const calendar = document.querySelector('.datepicker');
+      if (
+        calendar &&
+        !calendar.contains(event.target) &&
+        !input.contains(event.target)
+      ) {
+        picker.hide();
+      }
+    };
+
+    const handleRouteChange = () => {
+      picker.hide();
+    };
+
+    input.addEventListener('changeDate', (e) => {
       const fecha = e.detail.date;
       const seleccion = fecha.toISOString().split('T')[0];
       if (new Date(seleccion) > hoy) {
@@ -63,11 +81,22 @@
       } else {
         fechaSeleccionada = '';
       }
+      picker.hide();
     });
 
+    document.addEventListener('click', handleOutsideClick);
+    window.addEventListener('popstate', handleRouteChange);
+
     actualizarDisponibilidad();
+
+    onDestroy(() => {
+      document.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener('popstate', handleRouteChange);
+      picker?.destroy();
+    });
   });
 </script>
+
 
 <div class="reserva-container">
   <h2>Reservar tutoría</h2>
@@ -81,9 +110,8 @@
     {/each}
   </select>
 
-
   <label>Selecciona una fecha:</label>
-  <input id="datepickerEl" type="text" class="form-input" placeholder="Elegir fecha..." readonly />
+  <input id="datepickerEl" type="text" class="form-input" placeholder="Elegir fecha" readonly />
   {#if fechaSeleccionada}
     <p><strong>Fecha seleccionada:</strong> {fechaSeleccionada}</p>
   {/if}
@@ -113,15 +141,14 @@
 
 <style>
   .reserva-container {
-    max-width: 500px;
+    max-width: 600px;
     margin: 2rem auto;
     background: white;
     padding: 2rem;
     border-radius: 16px;
+    box-shadow: 4px 4px 0 #f2cd6d;
     font-family: sans-serif;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
-
 
   h2 {
     margin-bottom: 0.5rem;
@@ -138,10 +165,8 @@
     font-weight: bold;
   }
 
-  .reserva-container select.form-select,
-  .reserva-container input.form-input {
+  .form-select, .form-input {
     width: 100%;
-    display: block;
     padding: 12px;
     margin-top: 0.5rem;
     margin-bottom: 1rem;
@@ -149,9 +174,7 @@
     border-radius: 12px;
     box-shadow: 3px 3px 0 #bbb;
     font-size: 1rem;
-    box-sizing: border-box;
   }
-
 
   .hora-selector {
     display: flex;
@@ -212,10 +235,4 @@
     background-color: #1e1e2f;
     color: white;
   }
-
-  .form-select:invalid {
-    color: gray;
-  }
-
-
 </style>
