@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import Datepicker from 'flowbite-datepicker/Datepicker';
 
   let fechaSeleccionada = '';
@@ -12,6 +12,8 @@
 
   const hoy = new Date('2025-07-28'); // Cambiar a new Date() en producción
   let fechaMinima = hoy.toISOString().split('T')[0];
+
+  let picker;
 
   function actualizarDisponibilidad() {
     const franjas = [
@@ -48,14 +50,30 @@
   }
 
   onMount(() => {
-    const picker = new Datepicker(document.getElementById('datepickerEl'), {
+    const input = document.getElementById('datepickerEl');
+    picker = new Datepicker(input, {
       format: 'yyyy-mm-dd',
       minDate: fechaMinima,
-      autohide: true,
+      autohide: false,
       todayHighlight: false,
     });
 
-    document.getElementById('datepickerEl').addEventListener('changeDate', (e) => {
+    const handleOutsideClick = (event) => {
+      const calendar = document.querySelector('.datepicker');
+      if (
+        calendar &&
+        !calendar.contains(event.target) &&
+        !input.contains(event.target)
+      ) {
+        picker.hide();
+      }
+    };
+
+    const handleRouteChange = () => {
+      picker.hide();
+    };
+
+    input.addEventListener('changeDate', (e) => {
       const fecha = e.detail.date;
       const seleccion = fecha.toISOString().split('T')[0];
       if (new Date(seleccion) > hoy) {
@@ -63,11 +81,22 @@
       } else {
         fechaSeleccionada = '';
       }
+      picker.hide();
     });
 
+    document.addEventListener('click', handleOutsideClick);
+    window.addEventListener('popstate', handleRouteChange);
+
     actualizarDisponibilidad();
+
+    onDestroy(() => {
+      document.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener('popstate', handleRouteChange);
+      picker?.destroy();
+    });
   });
 </script>
+
 
 <div class="reserva-container">
   <h2>Reservar tutoría</h2>
