@@ -1,8 +1,12 @@
 <script>
+  import { transformarFecha } from '../../../utils/transformarFecha.js';
+  import { transformarTexto } from '../../../utils/transformarTexto.js';
   import { onMount } from 'svelte';
   import { Calendar } from '@fullcalendar/core';
   import dayGridPlugin from '@fullcalendar/daygrid';
   import interactionPlugin from '@fullcalendar/interaction';
+
+  export let data;
 
   let calendarioEl;
   let tutoriasDelDia = [];
@@ -10,29 +14,7 @@
 
   let panelTutoriasEl;
 
-  const tutorias = [
-    {
-      title: 'Tutoría de Cálculo',
-      date: '2025-07-15',
-      hora: '10:00 AM',
-      tutor: 'Profa. Herrera',
-      asistido: false
-    },
-    {
-      title: 'Programación',
-      date: '2025-07-17',
-      hora: '2:00 PM',
-      tutor: 'Ing. López',
-      asistido: false
-    },
-    {
-      title: 'Química',
-      date: '2025-08-02',
-      hora: '4:30 PM',
-      tutor: 'Dr. Fernández',
-      asistido: false
-    }
-  ];
+  const tutorias = data.tutoriasActivas.map(tutoria => {return {...tutoria, fecha: transformarFecha(tutoria.fecha)};}).map(m => ({ ...m, materia: transformarTexto(m.materia) }));
 
   onMount(() => {
     const calendar = new Calendar(calendarioEl, {
@@ -48,11 +30,11 @@
         today: 'Este mes'
       },
       events: tutorias.map(t => ({
-        title: t.title,
-        start: t.date
+        title: t.materia,
+        start: t.fecha
       })),
       dateClick(info) {
-        const eventos = tutorias.filter(e => e.date === info.dateStr);
+        const eventos = tutorias.filter(e => e.fecha === info.dateStr);
         // Parse date as local to avoid timezone issues
         const [year, month, day] = info.dateStr.split('-').map(Number);
         const fechaLocal = new Date(year, month - 1, day);
@@ -75,10 +57,6 @@
 
     calendar.render();
   });
-
-  function alternarAsistencia(indice) {
-    tutoriasDelDia[indice].asistido = !tutoriasDelDia[indice].asistido;
-  }
 
   function capitalizeWords(str) {
     // Capitaliza la primera letra de cada palabra, excepto "de"
@@ -120,12 +98,9 @@
       <ul>
         {#each tutoriasDelDia as t, i}
           <li>
-            <strong>Materia:</strong> {t.title}<br />
-            <strong>Hora:</strong> {t.hora}<br />
-            <strong>Tutor:</strong> {t.tutor}<br />
-            <button on:click={() => alternarAsistencia(i)} style="margin-top: 1rem;">
-              {t.asistido ? '❌ Desmarcar asistencia' : '✅ Marcar asistencia'}
-            </button>
+            <strong>Materia:</strong> {t.materia}<br />
+            <strong>Hora:</strong> {t.horario}<br />
+            <strong>Estudiante:</strong> {t.estudiante}<br />
           </li>
         {/each}
       </ul>
@@ -189,21 +164,5 @@
   .panel-tutorias li {
     padding: 0.75rem 0;
     border-bottom: 1px solid #f0e8cf;
-  }
-
-  .panel-tutorias button {
-    margin-top: 0.5rem;
-    background-color: #FBBF24;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #1E1E2F;
-    transition: background-color 0.2s ease;
-  }
-
-  .panel-tutorias button:hover {
-    background-color: #facc15;
   }
 </style>

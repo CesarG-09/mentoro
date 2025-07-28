@@ -1,4 +1,10 @@
 <script>
+  import { transformarTexto } from "../../../utils/transformarTexto";
+  import { convertDateToSpanish } from "../../../utils/convertDates";
+  import { enhance } from '$app/forms';
+
+  export let data;
+
   let hover = 0;
   let criterioPrincipal = 'fecha';
 
@@ -6,29 +12,7 @@
   let ordenMateriaAscendente = true;
   let ordenFechaReciente = true;
 
-  let estudiantes = [
-    {
-      nombre: 'María Gómez',
-      materia: 'Cálculo I',
-      comentario: '',
-      fechaEvaluacion: '2025-07-14',
-      calificacion: 0
-    },
-    {
-      nombre: 'Luis Navarro',
-      materia: 'Programación',
-      comentario: '',
-      fechaEvaluacion: '2025-07-16',
-      calificacion: 0
-    },
-    {
-      nombre: 'Sofía Díaz',
-      materia: 'Química',
-      comentario: '',
-      fechaEvaluacion: '2025-07-15',
-      calificacion: 0
-    }
-  ];
+  let estudiantes = data.tutoriasFinalizadas.map(m => ({ ...m, materia: transformarTexto(m.materia) })).map(m => ({ ...m, fecha: convertDateToSpanish(m.fecha)})).map(item => ({...item, calificacion: 0}));
 
   function guardarEvaluacion(estudiante) {
     alert(`✅ Evaluación guardada para ${estudiante.nombre}`);
@@ -50,7 +34,26 @@
   }
 
   function calificar(estudiante, estrellas) {
-    estudiante.calificacion = estrellas;
+  const index = estudiantes.findIndex(e => e.id === estudiante.id);
+  if (index !== -1) {
+    estudiantes[index] = { ...estudiante, calificacion: estrellas };
+    estudiantes = [...estudiantes];
+  }
+}
+
+  function handleResult({ form, data, cancel }) {
+    return async ({ result, error, update }) => {
+      if (error) {
+        console.error('Error en acción', result.data);
+      } else if (result) {
+        console.log('Action exitosa', result.data);
+        estudiantes = result.data.tutoriasFinalizadas.map(m => ({ ...m, materia: transformarTexto(m.materia) })).map(m => ({ ...m, fecha: convertDateToSpanish(m.fecha)})).map(item => ({...item, calificacion: 0}));
+        update(result);
+        if (result.type === 'failure') {
+          console.error('Error en acción', result.data);
+        }
+      }
+    };
   }
 
   $: comparar = (a, b) => {
@@ -65,15 +68,13 @@
           : b.materia.localeCompare(a.materia);
       case 'fecha':
       default:
-        const fechaA = new Date(a.fechaEvaluacion).getTime();
-        const fechaB = new Date(b.fechaEvaluacion).getTime();
+        const fechaA = a.fecha;
+        const fechaB = b.fecha;
         return ordenFechaReciente ? fechaB - fechaA : fechaA - fechaB;
     }
   };
 
-  $: estudiantesFiltrados = estudiantes
-    .slice()
-    .sort(comparar);
+  $: estudiantesFiltrados = estudiantes.slice().sort(comparar);
 </script>
 
 <div class="header">
@@ -88,46 +89,56 @@
 </div>
 
 <!-- 📝 Evaluaciones -->
-<div class="contenedor-evaluaciones">
-  {#each estudiantesFiltrados as est}
-    <div class="tarjeta-evaluacion">
-      <div class="tarjeta-encabezado">
-        <h3>{est.materia} — {est.nombre}</h3>
-        <div class="calificacion">
-          <p>⭐ ¿Qué calificación le das al Estudiante?</p>
-          <div class="estrellas">
-            {#each Array(5) as _, i}
-              <span
-                role="button"
-                tabindex="0"
-                class={i < (hover || est.calificacion) ? 'activa' : 'inactiva'}
-                on:click={() => calificar(est, i + 1)}
-                on:keydown={(e) => e.key === 'Enter' && calificar(est, i + 1)}
-                on:mouseover={() => hover = i + 1}
-                on:mouseout={() => hover = 0}
-                on:focus={() => hover = i + 1}
-                on:blur={() => hover = 0}
-              >★</span>
-            {/each}
+
+  <div class="contenedor-evaluaciones">
+    {#if estudiantesFiltrados.length === 0}
+        <p>No tienes calificaciones pendientes.</p>
+    {:else}
+    {#each estudiantesFiltrados as est}
+      <form method="POST" use:enhance={handleResult}>
+        <div class="tarjeta-evaluacion">
+          <div class="tarjeta-encabezado">
+            <h3>{est.materia} — {est.nombre}</h3>
+            <div class="calificacion">
+              <p>⭐ ¿Qué calificación le das al Estudiante?</p>
+              <div class="estrellas">
+                {#each Array(5) as _, i}
+                  <span
+                    role="button"
+                    tabindex="0"
+                    class={i < (hover || est.calificacion) ? 'activa' : 'inactiva'}
+                    on:click={() => calificar(est, i + 1)}
+                    on:keydown={(e) => e.key === 'Enter' && calificar(est, i + 1)}
+                    on:mouseover={() => hover = i + 1}
+                    on:mouseout={() => hover = 0}
+                    on:focus={() => hover = i + 1}
+                    on:blur={() => hover = 0}
+                  >★</span>
+                {/each}
+              </div>
+            </div>
           </div>
+
+          <div class="fecha-evaluacion">
+            📅 Finalizada: {new Date(est.fecha).toLocaleDateString('es-ES', {
+              year: 'numeric', month: 'long', day: 'numeric'
+            })}
+          </div>
+
+          <label>
+            Comentario del tutor:
+            <textarea name="comentario" rows="3" placeholder="Escribe tu comentario..." required></textarea>
+          </label>
+
+          <button type="submit">Guardar evaluación</button>
+          <input type="hidden" name="id_reserva" value={est.id}>
+          <input type="hidden" name="calificacion" value={est.calificacion}>
         </div>
-      </div>
+      </form>
+    {/each}
+    {/if}
+  </div>
 
-      <div class="fecha-evaluacion">
-        📅 Evaluación: {new Date(est.fechaEvaluacion).toLocaleDateString('es-ES', {
-          year: 'numeric', month: 'long', day: 'numeric'
-        })}
-      </div>
-
-      <label>
-        Comentario del tutor:
-        <textarea bind:value={est.comentario} rows="3" placeholder="Escribe tu comentario..."></textarea>
-      </label>
-
-      <button on:click={() => guardarEvaluacion(est)}>Guardar evaluación</button>
-    </div>
-  {/each}
-</div>
 
 <style>
   :global(body) {
@@ -136,6 +147,7 @@
     font-family: 'Segoe UI', sans-serif;
     background-color: #F2EEE6;
   }
+
     .header {
     display: flex;
     align-items: center;
@@ -144,6 +156,7 @@
     padding-left: 5rem;
     cursor:default;
   }
+
   .filtros {
     max-width: 1000px;
     margin: 0 auto;
@@ -167,7 +180,6 @@
 
   }
 
-
   .contenedor-evaluaciones {
     max-width: 1000px;
     margin: 0 auto;
@@ -189,7 +201,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: -2.5rem;
   }
 
   .fecha-evaluacion {
@@ -224,7 +236,7 @@
     background-color: #facc15;
   }
 
-   .calificacion {
+  .calificacion {
     margin-top: 1rem;
   }
 

@@ -1,5 +1,49 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+
+  export let data;
+
+  let intervalId;
+
+	onMount(() => {
+		// Ejecuta al montar el layout
+		checkSession();
+
+		// Verifica cada 60 segundos
+		intervalId = setInterval(checkSession, 60_000);
+	});
+
+	onDestroy(() => {
+		clearInterval(intervalId);
+	});
+
+	async function checkSession() {
+		try {
+			const res = await fetch('/api/check-session');
+
+			if (!res.ok) {
+				console.log('Sesión inválida o expirada. Redirigiendo...');
+				goto('/login');
+			}
+		} catch (err) {
+			console.error('Error verificando sesión:', err);
+			goto('/login');
+		}
+	}
+
+  async function cerrarSesion() {
+    try {
+      await fetch('/api/logout', {
+        method: 'POST',
+      });
+
+      goto('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  }
 </script>
 
 <div class="layout">
@@ -14,8 +58,8 @@
       <img src="/single_logo.png" alt="Logo Mentoro" class="imagenlogo" />
     </div>
     <div class="user-info">
-      <span>Hola, <strong>tutor@mentoro.pa</strong></span>
-      <button>Cerrar sesión</button>
+      <span>Hola, <strong>{data.usuario.usuario}</strong></span>
+      <button on:click={cerrarSesion}>Cerrar sesión</button>
     </div>
     
   </div>

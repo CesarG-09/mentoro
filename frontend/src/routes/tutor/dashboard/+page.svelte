@@ -1,23 +1,31 @@
 <script>
+  import { transformarTexto } from "../../../utils/transformarTexto"
+  import { Legend } from 'chart.js';
   import { onMount } from 'svelte';
+
+  export let data;
 
   let graficaAprobados;
   let graficaRealizadas;
   let graficaMensual;
 
-  let historialMensual = {
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May'],
-    series: [2, 1, 3, 2, 4]
-  };
-
   let estadisticas = {
-    valoracionPromedio: 4.3,
-    tutoriasAceptadas: 15,
-    tutoriasRechazadas: 5,
-    tutoriasRealizadas: 12,
-    estudiantesAprobados: 9,
+    valoracionPromedio: data.datosTutor.calificacion_promedio,
+    tutoriasAceptadas: data.datosTutor.tutorias_aceptadas,
+    tutoriasRechazadas: data.datosTutor.tutorias_rechazadas,
+    tutoriasRealizadas: data.datosTutor.tutorias_finalizadas,
+    tutoriasCanceladas: data.datosTutor.tutorias_canceladas,
+    estudiantesAprobados: 7,
     estudiantesReprobados: 3,
-    tutoriasEsteMes: 4
+    tutoriasEsteMes: 4,
+    historialMaterias: {
+      labels: data.datosTutor.grafica_materias.map(m => transformarTexto(m.materia.trim())),
+      series: data.datosTutor.grafica_materias.map(m => m.total)
+    },
+    historialMensual: {
+      labels: data.datosTutor.grafica_mensual.map(m => m.mes.trim()),
+      series: data.datosTutor.grafica_mensual.map(m => m.total)
+    }
   };
 
   onMount(async () => {
@@ -27,34 +35,36 @@
     if (graficaRealizadas) {
       new ApexCharts(graficaRealizadas, {
         chart: { type: 'donut' },
-      labels: ['Realizadas', 'No realizadas'],
-      series: [
-        estadisticas.tutoriasRealizadas,
-        estadisticas.tutoriasAceptadas - estadisticas.tutoriasRealizadas
-      ],
-      colors: ['#3B82F6', '#D1D5DB'],
-      title: { text: 'Realizadas vs Aceptadas' }
-    }).render();
+        labels: ['Realizadas', 'No realizadas'],
+        series: [
+          estadisticas.tutoriasRealizadas,
+          estadisticas.tutoriasAceptadas - estadisticas.tutoriasRealizadas
+        ],
+        colors: ['#3B82F6', '#D1D5DB'],
+        title: { text: 'Aceptadas vs Realizadas' }
+      }).render();
     }
 
     if (graficaAprobados) {
       new ApexCharts(graficaAprobados, {
-        chart: { type: 'donut' },
-      labels: ['Aprobados', 'Reprobados'],
-      series: [estadisticas.estudiantesAprobados, estadisticas.estudiantesReprobados],
-      colors: ['#10B981', '#EF4444'],
-      title: { text: 'Aprobados vs Reprobados' }
-    }).render();
+        chart: { type: 'bar' },
+        series: [{ name: 'Tutorías realizadas', data: estadisticas.historialMaterias.series }],
+        xaxis: { categories: estadisticas.historialMaterias.labels },
+        colors: ['#6366F1'],
+        title: { text: 'Historial mensual' },
+        responsive: [{ breakpoint: 500, options: { chart: { height: 800 } } }]
+      }).render();
     }
+    
     if (graficaMensual) {
       new ApexCharts(graficaMensual, {
         chart: { type: 'bar' },
-      series: [{ name: 'Tutorías realizadas', data: historialMensual.series }],
-      xaxis: { categories: historialMensual.labels },
-      colors: ['#6366F1'],
-      title: { text: 'Historial mensual' },
-      responsive: [{ breakpoint: 500, options: { chart: { height: 300 } } }]
-    }).render();
+        series: [{ name: 'Tutorías realizadas', data: estadisticas.historialMensual.series }],
+        xaxis: { categories: estadisticas.historialMensual.labels },
+        colors: ['#6366F1'],
+        title: { text: 'Historial mensual' },
+        responsive: [{ breakpoint: 500, options: { chart: { height: 300 } } }]
+      }).render();
     }
 
   });
@@ -71,23 +81,32 @@
     <div class="tarjeta">✅ Aceptadas<p class="valor">{estadisticas.tutoriasAceptadas}</p></div>
     <div class="tarjeta">❌ Rechazadas<p class="valor">{estadisticas.tutoriasRechazadas}</p></div>
     <div class="tarjeta">🔁 Realizadas<p class="valor">{estadisticas.tutoriasRealizadas}</p></div>
-    <div class="tarjeta">🎓 Aprobados<p class="valor">{estadisticas.estudiantesAprobados}</p></div>
-    <div class="tarjeta">⚠️ Reprobados<p class="valor">{estadisticas.estudiantesReprobados}</p></div>
-    <div class="tarjeta">📅 Este Mes<p class="valor">{estadisticas.tutoriasEsteMes}</p></div>
+    <div class="tarjeta">🚫 Canceladas<p class="valor">{estadisticas.tutoriasCanceladas}</p></div>
   </div>
 <div class="contenedor">
-  <div class="grafico" bind:this={graficaRealizadas}></div>
-  <div class="grafico" bind:this={graficaAprobados}></div>
+  {#if estadisticas.tutoriasAceptadas > 0}
+    <div class="grafico" bind:this={graficaRealizadas}></div>
+  {/if}
+  {#if estadisticas.tutoriasAceptadas == 0}
+    <div class="grafico" style="text-align: center; padding: 30%">No hay datos del tutor</div>
+  {/if}
+  {#if estadisticas.historialMaterias.labels.length > 0}
+    <div class="grafico" bind:this={graficaAprobados}></div>
+  {/if}
+  {#if estadisticas.historialMaterias.labels.length == 0}
+    <div class="grafico" style="text-align: center; padding: 30%">No hay datos del tutor</div>
+  {/if}
   <div class="grafico" bind:this={graficaMensual}></div>
 </div>
 
 <style>
-   :global(body) {
+  :global(body) {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', sans-serif;
     background-color: #F2EEE6;
   }
+
   .header {
     display: flex;
     align-items: center;
@@ -96,24 +115,23 @@
     padding-left: 5rem;
     cursor:default;
   }
+
   .contenedor {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 3rem;
+    gap: 1rem;
     justify-content: center;
-    max-width: 10000px;
+    max-width: 1800px;
     min-width: 500px;
     padding: 1rem;
     padding-left: 5rem;
     padding-right: 5rem;
   }
 
-
-.grid {
+  .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem;
-    margin-bottom: 3rem;
     padding-left: 5rem;
     padding-right: 5rem;
   }
@@ -132,14 +150,13 @@
     font-size: 1.4rem;
     font-weight: bold;
     color: #1E1E2F;
-    margin-top: 0.3rem;
+    margin: 5px;
   }
 
  .grafico {
-  background: white;
-  border-radius: 8px;
-  padding: 0.8rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-}
-  
+    background: white;
+    border-radius: 8px;
+    padding: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+  }
 </style>

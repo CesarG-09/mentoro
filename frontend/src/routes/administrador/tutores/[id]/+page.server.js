@@ -2,11 +2,11 @@ import { fail } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals, params, fetch }) {
-    const id = params.id;
-    const id_usuario = id.match(/\d+$/)[0];
-    const id_tutor = id.match(/(\d+)-\d+$/)[1];
+  const id = params.id;
+  const id_usuario = id.match(/\d+$/)[0];
+  const id_tutor = id.match(/(\d+)-\d+$/)[1];
 
-    // Recupera el token desde locals (lo asignaste en hooks.js)
+  // Recupera el token desde locals (lo asignaste en hooks.js)
 	const token = locals.usuario?.token;
 
 	// Crea los headers con Authorization
@@ -14,17 +14,17 @@ export async function load({ locals, params, fetch }) {
 		Authorization: `Bearer ${token}`
 	};
 
-    const [tutorRes, usuarioRes] = await Promise.all([
-        fetch(`http://localhost:3001/api/ver-tutor?id_tutor=${encodeURIComponent(id_tutor)}`, { headers }),
-        fetch(`http://localhost:3001/api/estado-usuario?id_usuario=${encodeURIComponent(id_usuario)}`, { headers })
-    ]);
+  const [tutorRes, usuarioRes] = await Promise.all([
+      fetch(`http://localhost:3001/api/ver-tutor?id_tutor=${encodeURIComponent(id_tutor)}`, { headers }),
+      fetch(`http://localhost:3001/api/estado-usuario?id_usuario=${encodeURIComponent(id_usuario)}`, { headers })
+  ]);
 
-    const tutorData = await tutorRes.json();
-    const usuarioData = await usuarioRes.json();
+  const tutorData = await tutorRes.json();
+  const usuarioData = await usuarioRes.json();
     
-    return {
-		  tutor: tutorData.tutor || [],
-      usuario: usuarioData.usuario || []
+  return {
+	  tutor: tutorData.tutor || [],
+    usuario: usuarioData.usuario || []
 	};
 }
 
@@ -34,7 +34,7 @@ export const actions = {
     const id_usuario = id.match(/\d+$/)[0];
 
     const form = await request.formData();
-    let estado = form.get('estado'); // ✅ aquí está tu parámetro
+    let estado = form.get('estado');
     estado = estado === 'activo' ? 'eliminado' : 'activo';
 
     const token = locals.usuario?.token;

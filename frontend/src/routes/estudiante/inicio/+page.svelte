@@ -234,10 +234,9 @@
     }
 
     .contenido-limitado {
-    max-width: 1200px;
-    width: 90%;
-    margin: 0 auto;
-    padding: 20px 0;
+        max-width: 1200px;
+        width: 90%;
+        margin: 0 auto;
+        padding: 20px 0;
     }
-
 </style>

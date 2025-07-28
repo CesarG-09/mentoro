@@ -20,7 +20,13 @@ const {
   listarTopTutores,
   listarTutorias,
   verEstadoUsuario,
-  cambiarEstadoUsuario
+  cambiarEstadoUsuario,
+  verDatosTutor,
+  listarTutoriasEnEspera,
+  listarTutoriasAceptadas,
+  cambiarEstadoReserva,
+  listarTutoriasFinalizadas,
+  calificarEstudiante
 } = require('../models/usuarioModel');
 
 const registroEstudiante = async (req, res) => {
@@ -525,6 +531,140 @@ const cambioEstadoUsuario = async (req, res) => {
   }
 };
 
+const datosTutor = async (req, res) => {
+  try {
+    const id_usuario = req.query.id_usuario;
+    if (!id_usuario) {
+      return res.status(400).json({ error: 'El id_usuario es requerido' });
+    }
+
+    const resultado = await verDatosTutor(id_usuario);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontraron datos del tutor' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Datos obtenidos exitosamente',
+			datos: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener datos del tutor:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
+const listaTutoriasEnEspera = async (req, res) => {
+  try {
+    const id_usuario = req.query.id_usuario;
+    if (!id_usuario) {
+      return res.status(400).json({ error: 'El id_usuario es requerido' });
+    }
+
+    const resultado = await listarTutoriasEnEspera(id_usuario);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontraron datos del tutor' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Datos obtenidos exitosamente',
+			datos: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener datos del tutor:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
+const listaTutoriasAceptadas = async (req, res) => {
+  try {
+    const id_usuario = req.query.id_usuario;
+    if (!id_usuario) {
+      return res.status(400).json({ error: 'El id_usuario es requerido' });
+    }
+
+    const resultado = await listarTutoriasAceptadas(id_usuario);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontraron datos del tutor' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Datos obtenidos exitosamente',
+			datos: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener datos del tutor:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
+const cambioEstadoReserva = async (req, res) => {
+  try {
+    const { estado_tutoria, id_reserva } = req.body;
+
+    if (!estado_tutoria || !id_reserva) {
+      return res.status(400).json({ error: 'Estado_tutoria y id_reserva son requeridos' });
+    }
+
+    const resultado = await cambiarEstadoReserva(estado_tutoria, id_reserva);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontró la reserva' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Estado cambiado exitosamente',
+			resultado: resultado
+		});
+  } catch (error) {
+    console.error('Error al cambiar el estado:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
+const listaTutoriasFinalizadas = async (req, res) => {
+  try {
+    const id_usuario = req.query.id_usuario;
+    if (!id_usuario) {
+      return res.status(400).json({ error: 'El id_usuario es requerido' });
+    }
+
+    const resultado = await listarTutoriasFinalizadas(id_usuario);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontraron datos' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Datos obtenidos exitosamente',
+			datos: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener datos:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
+const calificaEstudiante = async (req, res) => {
+  try {
+    const { id_reserva, calificacion, comentario } = req.body;
+
+    if (!id_reserva || !calificacion || !comentario) {
+      return res.status(400).json({ error: 'Id_reserva, calificacion y comentario son requeridos' });
+    }
+
+    const resultado = await calificarEstudiante(id_reserva, calificacion, comentario);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ error: 'No se encontró la reserva' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Calificado cambiado exitosamente',
+			resultado: resultado
+		});
+  } catch (error) {
+    console.error('Error al calificar:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
 module.exports = {
   registroEstudiante,
   registroTutor,
@@ -545,5 +685,11 @@ module.exports = {
   topTutores,
   listaTutorias,
   estadoUsuario,
-  cambioEstadoUsuario
+  cambioEstadoUsuario,
+  datosTutor,
+  listaTutoriasEnEspera,
+  listaTutoriasAceptadas,
+  cambioEstadoReserva,
+  listaTutoriasFinalizadas,
+  calificaEstudiante
 };
