@@ -31,7 +31,7 @@
 
 <!-- tutores destacados -->
 <section>
-    <h2>tutores en tendencia</h2>
+    <h2>Tutores en tendencia</h2>
     <div class="professor-container">
         {#if tutores.length > 0}
             {#each tutores as tutor}

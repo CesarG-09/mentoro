@@ -184,7 +184,7 @@ async function listarTutorias(usuario) {
      WHERE u.usuario = $1
        AND (
              (r.estado_reserva = 'En espera' AND r.estado_tutoria = 'Pendiente')
-         OR (r.estado_reserva = 'Aceptada' AND r.estado_tutoria = 'En progreso')
+         OR (r.estado_reserva = 'Aceptada' AND r.estado_tutoria = 'En Progreso')
            )
      ORDER BY r.fe_reserva ASC;`,
      [usuario]
@@ -222,6 +222,218 @@ async function cambiarEstadoUsuario(estado, id_usuario) {
   return resultado.rows[0];
 }
 
+async function verDatosTutor(id_usuario) {
+  const resultado = await pool.query(
+    `SELECT
+      (
+          SELECT COALESCE(ROUND(AVG(e.calificacion)::numeric, 1), 0)::float
+          FROM Eval_tutor e
+          JOIN Tutor t2 ON e.id_tutor = t2.id_tutor
+          WHERE t2.id_usuario = $1
+      ) AS calificacion_promedio,
+      (
+          SELECT COUNT(*)::int
+          FROM Reserva r
+          JOIN Tutor t2 ON r.id_tutor = t2.id_tutor
+          WHERE t2.id_usuario = $1
+            AND r.estado_reserva = 'Aceptada'
+      ) AS tutorias_aceptadas,
+      (
+          SELECT COUNT(*)::int
+          FROM Reserva r
+          JOIN Tutor t2 ON r.id_tutor = t2.id_tutor
+          WHERE t2.id_usuario = $1
+            AND r.estado_reserva = 'Rechazada'
+      ) AS tutorias_rechazadas,
+      (
+          SELECT COUNT(*)::int
+          FROM Reserva r
+          JOIN Tutor t2 ON r.id_tutor = t2.id_tutor
+          WHERE t2.id_usuario = $1
+            AND r.estado_tutoria = 'Finalizada' OR r.estado_tutoria = 'Calificada'
+      ) AS tutorias_finalizadas,
+      (
+          SELECT COUNT(*)::int
+          FROM Reserva r
+          JOIN Tutor t2 ON r.id_tutor = t2.id_tutor
+          WHERE t2.id_usuario = $1
+            AND r.estado_tutoria = 'Cancelada'
+      ) AS tutorias_canceladas,
+      COALESCE((
+          SELECT json_agg(row_to_json(tm_data))
+          FROM (
+              SELECT 
+                  m.de_materia AS materia,
+                  COUNT(r.id_reserva)::int AS total
+              FROM Reserva r
+              JOIN Tutor t2 ON r.id_tutor = t2.id_tutor
+              JOIN Materia m ON r.id_materia = m.id_materia
+              WHERE t2.id_usuario = $1
+                AND r.estado_tutoria = 'Finalizada' OR r.estado_tutoria = 'Calificada'
+              GROUP BY m.de_materia
+              ORDER BY total DESC, m.de_materia ASC
+          ) AS tm_data
+      ), '[]'::json) AS grafica_materias,
+      COALESCE((
+        SELECT json_agg(row_to_json(hist_data))
+        FROM (
+          SELECT
+            INITCAP(TO_CHAR(meses.fecha_mes, 'TMMonth')) AS mes,
+            COALESCE(t.total, 0)::int AS total
+          FROM (
+            SELECT date_trunc('month', CURRENT_DATE) - (n || ' months')::interval AS fecha_mes
+            FROM generate_series(0, 4) AS s(n)
+          ) AS meses
+          LEFT JOIN (
+            SELECT
+              date_trunc('month', r.fe_reserva)::date AS fecha_mes,
+              COUNT(*)::int AS total
+            FROM Reserva r
+            JOIN Tutor t2 ON r.id_tutor = t2.id_tutor
+            WHERE t2.id_usuario = $1
+              AND r.estado_tutoria = 'Finalizada' OR r.estado_tutoria = 'Calificada'
+              AND r.fe_reserva >= (date_trunc('month', CURRENT_DATE) - interval '4 months')
+            GROUP BY date_trunc('month', r.fe_reserva)
+          ) AS t ON t.fecha_mes = meses.fecha_mes
+          ORDER BY meses.fecha_mes ASC
+        ) AS hist_data
+      ), '[]'::json) AS grafica_mensual;
+    `,
+    [id_usuario]
+  );
+  return resultado.rows[0];
+}
+
+async function listarTutoriasEnEspera(id_usuario) {
+  const resultado = await pool.query(
+    `SELECT
+        r.id_reserva AS id,
+        CONCAT(e.nombre, ' ', e.apellido) AS estudiante,
+        m.de_materia AS materia,
+        (
+          BTRIM(TO_CHAR(r.fe_reserva, 'TMDay')) || ' ' ||
+          TO_CHAR(r.fe_reserva, 'DD TMMonth YYYY')
+        ) AS fecha,
+        (
+          TO_CHAR(r.hora_inicio, 'HH12:MI AM') || ' - ' ||
+          TO_CHAR(r.hora_fin, 'HH12:MI AM')
+        ) AS horario
+    FROM Reserva r
+    JOIN Tutor t ON r.id_tutor = t.id_tutor
+    JOIN Estudiante e ON r.id_estudiante = e.id_estudiante
+    JOIN Materia m ON r.id_materia = m.id_materia
+    WHERE t.id_usuario = $1
+      AND r.estado_reserva = 'En espera' AND r.estado_tutoria = 'Pendiente'
+    ORDER BY r.fe_reserva ASC, r.hora_inicio ASC;
+    `,
+    [id_usuario]
+  );
+  return resultado.rows;
+}
+
+async function listarTutoriasAceptadas(id_usuario) {
+  const resultado = await pool.query(
+    `SELECT
+        r.id_reserva AS id,
+        CONCAT(e.nombre, ' ', e.apellido) AS estudiante,
+        m.de_materia AS materia,
+        (
+          BTRIM(TO_CHAR(r.fe_reserva, 'TMDay')) || ' ' ||
+          TO_CHAR(r.fe_reserva, 'DD TMMonth YYYY')
+        ) AS fecha,
+        (
+          TO_CHAR(r.hora_inicio, 'HH12:MI AM') || ' - ' ||
+          TO_CHAR(r.hora_fin, 'HH12:MI AM')
+        ) AS horario
+    FROM Reserva r
+    JOIN Tutor t ON r.id_tutor = t.id_tutor
+    JOIN Estudiante e ON r.id_estudiante = e.id_estudiante
+    JOIN Materia m ON r.id_materia = m.id_materia
+    WHERE t.id_usuario = $1
+      AND r.estado_reserva = 'Aceptada' AND r.estado_tutoria = 'En Progreso'
+    ORDER BY r.fe_reserva ASC, r.hora_inicio ASC;
+    `,
+    [id_usuario]
+  );
+  return resultado.rows;
+}
+
+async function cambiarEstadoReserva(estado_tutoria, id_reserva) {
+  const resultado = await pool.query(
+    `UPDATE Reserva
+      SET 
+          estado_tutoria = $1,
+          estado_reserva = CASE
+              WHEN $1 = 'En Progreso' THEN 'Aceptada'
+              WHEN $1 = 'Rechazada'   THEN 'Rechazada'
+              WHEN $1 = 'Cancelada'   THEN 'Aceptada'
+              ELSE estado_reserva
+          END
+      WHERE id_reserva = $2
+      RETURNING estado_tutoria`,
+     [estado_tutoria, id_reserva]
+  );
+  return resultado.rows[0];
+}
+
+async function listarTutoriasFinalizadas(id_usuario) {
+  const resultado = await pool.query(
+    `SELECT
+        r.id_reserva AS id,
+        CONCAT(e.nombre, ' ', e.apellido) AS nombre,
+        m.de_materia AS materia,
+        (
+          BTRIM(TO_CHAR(r.fe_reserva, 'TMDay')) || ' ' ||
+          TO_CHAR(r.fe_reserva, 'DD TMMonth YYYY')
+        ) AS fecha
+    FROM Reserva r
+    JOIN Tutor t ON r.id_tutor = t.id_tutor
+    JOIN Estudiante e ON r.id_estudiante = e.id_estudiante
+    JOIN Materia m ON r.id_materia = m.id_materia
+    WHERE t.id_usuario = $1
+      AND r.estado_reserva = 'Aceptada' AND r.estado_tutoria = 'Finalizada'
+    ORDER BY r.fe_reserva ASC, r.hora_inicio ASC;
+    `,
+    [id_usuario]
+  );
+  return resultado.rows;
+}
+
+async function calificarEstudiante(id_reserva, calificacion, comentario) {
+  const resultado = await pool.query(
+    `WITH nueva_evaluacion AS (
+      INSERT INTO Eval_estudiante (
+          id_tutor,
+          id_estudiante,
+          id_reserva,
+          calificacion,
+          comentario,
+          fe_evaluacion
+      )
+      SELECT 
+          r.id_tutor,
+          r.id_estudiante,
+          r.id_reserva,
+          $2,
+          $3,
+          NOW()
+      FROM Reserva r
+      WHERE r.id_reserva = $1
+      RETURNING id_reserva
+    ),
+    actualizacion AS (
+      UPDATE Reserva
+      SET estado_tutoria = 'Calificada'
+      WHERE id_reserva IN (SELECT id_reserva FROM nueva_evaluacion)
+      RETURNING id_reserva, estado_tutoria
+    )
+    SELECT * FROM actualizacion;
+    `,
+    [id_reserva, calificacion, comentario]
+  );
+  return resultado.rows;
+}
+
 module.exports = {
   registrarEstudiante,
   registrarTutor,
@@ -242,5 +454,11 @@ module.exports = {
   listarTopTutores,
   listarTutorias,
   verEstadoUsuario,
-  cambiarEstadoUsuario
+  cambiarEstadoUsuario,
+  verDatosTutor,
+  listarTutoriasEnEspera,
+  listarTutoriasAceptadas,
+  cambiarEstadoReserva,
+  listarTutoriasFinalizadas,
+  calificarEstudiante
 };

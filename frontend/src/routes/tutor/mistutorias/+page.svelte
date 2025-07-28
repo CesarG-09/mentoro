@@ -1,115 +1,112 @@
 <script>
-  let solicitudes = [
-    {
-      id: 1,
-      estudiante: 'Carlos Ruiz',
-      materia: 'Matemáticas',
-      horario: 'Lunes 10:00 AM'
-    },
-    {
-      id: 2,
-      estudiante: 'Ana Torres',
-      materia: 'Historia',
-      horario: 'Miércoles 3:00 PM'
-    }
-  ];
+  import { transformarTexto } from "../../../utils/transformarTexto";
+  import { convertDateToSpanish } from "../../../utils/convertDates";
+  import { enhance } from '$app/forms';
+  import { onMount } from 'svelte';
 
-  let activas = [
-    {
-      id: 101,
-      estudiante: 'Luis Navarro',
-      materia: 'Programación',
-      horario: 'Martes 2:00 PM'
-    },
-    {
-      id: 102,
-      estudiante: 'Sofía Díaz',
-      materia: 'Química',
-      horario: 'Jueves 9:00 AM'
-    }
-  ];
+  export let data;
 
-  function aceptarSolicitud(id) {
-    if (confirm('¿Estás seguro de aceptar esta tutoría?')) {
-      const solicitud = solicitudes.find(s => s.id === id);
-      activas = [...activas, solicitud];
-      solicitudes = solicitudes.filter(s => s.id !== id);
-    }
+  let estado;
+
+  let solicitudes = data.tutoriasEnEspera.map(m => ({ ...m, materia: transformarTexto(m.materia) })).map(m => ({ ...m, fecha: convertDateToSpanish(m.fecha)}));
+
+  let activas = data.tutoriasActivas.map(m => ({ ...m, materia: transformarTexto(m.materia) })).map(m => ({ ...m, fecha: convertDateToSpanish(m.fecha)}));
+
+  function handleResult({ form, data, cancel }) {
+    return async ({ result, error, update }) => {
+      if (error) {
+        console.error('Error en acción', result.data);
+      } else if (result) {
+        console.log('Action exitosa', result.data);
+        solicitudes = result.data.tutoriasEnEspera.map(m => ({ ...m, materia: transformarTexto(m.materia) })).map(m => ({ ...m, fecha: convertDateToSpanish(m.fecha)}));
+        activas = result.data.tutoriasActivas.map(m => ({ ...m, materia: transformarTexto(m.materia) })).map(m => ({ ...m, fecha: convertDateToSpanish(m.fecha)}));
+        update(result);
+        if (result.type === 'failure') {
+          console.error('Error en acción', result.data);
+        }
+      }
+    };
   }
 
-  function rechazarSolicitud(id) {
-    if (confirm('¿Estás seguro de rechazar esta solicitud?')) {
-      solicitudes = solicitudes.filter(s => s.id !== id);
-    }
-  }
-
-  function cancelarTutoría(id) {
-    if (confirm('¿Estás seguro de cancelar esta tutoría?')) {
-      activas = activas.filter(t => t.id !== id);
-    }
-  }
+  onMount(() => {
+    document.querySelectorAll('button').forEach(boton =>
+      boton.addEventListener('click', () => {
+        estado = boton.getAttribute('data-texto');
+        if (estado === 'Aceptada') estado = 'En Progreso';
+      })
+    );
+  });
 </script>
-      <div class="header">
-          <h2>Mis Tutorias</h2>
-      </div>
+
+<div class="header">
+  <h2>Mis Tutorias</h2>
+</div>
+
 <div class="panel">
-  <section>
-    <h3>📬 Solicitudes pendientes ({solicitudes.length})</h3>
-    {#if solicitudes.length === 0}
-      <p>No tienes solicitudes pendientes.</p>
-    {:else}
+  
+    <section>
+      <h3>📬 Solicitudes pendientes ({solicitudes.length})</h3>
+      {#if solicitudes.length === 0}
+        <p>No tienes solicitudes pendientes.</p>
+      {:else}
+        <div class="grid">
+          {#each solicitudes as s}
+            <form method="POST" use:enhance={handleResult}>
+              <div class="tarjeta solicitud">
+                <h4>{s.materia}</h4>
+                <p>👨‍🎓 Estudiante: <strong>{s.estudiante}</strong></p>
+                <p>📅 Fecha: <strong>{s.fecha}</strong></p>
+                <p>🕒 Horario: <strong>{s.horario}</strong></p>
+                <div class="acciones">
+                  <button type="submit" class="aceptar" data-texto="Aceptada">✅ Aceptar</button>
+                  <button type="submit" class="rechazar" data-texto="Rechazada">❌ Rechazar</button>
+                  <input type="hidden" name="id_reserva" value={s.id}>
+                  <input type="hidden" name="estado" value={estado}>
+                </div>
+              </div>
+            </form>
+          {/each}
+        </div>
+      {/if}
+    </section>
 
-    
-      <div class="grid">
-        {#each solicitudes as s}
-          <div class="tarjeta solicitud">
-            <h4>{s.materia}</h4>
-            <p>👨‍🎓 Estudiante: <strong>{s.estudiante}</strong></p>
-            <p>🕒 Horario: <strong>{s.horario}</strong></p>
-            <div class="acciones">
-              <button class="aceptar" on:click={() => aceptarSolicitud(s.id)}>✅ Aceptar</button>
-              <button class="rechazar" on:click={() => rechazarSolicitud(s.id)}>❌ Rechazar</button>
-            </div>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  </section>
-
-  <section>
-    <h3>🔔 Tutorías activas ({activas.length})</h3>
-    {#if activas.length === 0}
-      <p>No tienes tutorías activas.</p>
-    {:else}
-      <div class="grid">
-        {#each activas as t}
-          <div class="tarjeta activa">
-            <h4>{t.materia}</h4>
-            <p>👨‍🎓 Estudiante: <strong>{t.estudiante}</strong></p>
-            <p>🕒 Horario: <strong>{t.horario}</strong></p>
-            <div class="acciones">
-              <button class="cancelar" on:click={() => cancelarTutoría(t.id)}>🔴 Cancelar</button>
-            </div>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  </section>
+    <section>
+      <h3>🔔 Tutorías activas ({activas.length})</h3>
+      {#if activas.length === 0}
+        <p>No tienes tutorías activas.</p>
+      {:else}
+        <div class="grid">
+          {#each activas as t}
+            <form method="POST" use:enhance={handleResult}>
+              <div class="tarjeta activa">
+                <h4>{t.materia}</h4>
+                <p>👨‍🎓 Estudiante: <strong>{t.estudiante}</strong></p>
+                <p>📅 Fecha: <strong>{t.fecha}</strong></p>
+                <p>🕒 Horario: <strong>{t.horario}</strong></p>
+                <div class="acciones">
+                  <button type="submit" class="cancelar" data-texto="Cancelada">🔴 Cancelar</button>
+                  <input type="hidden" name="id_reserva" value={t.id}>
+                  <input type="hidden" name="estado" value={estado}>
+                </div>
+              </div>
+            </form>
+          {/each}
+        </div>
+      {/if}
+    </section>
 </div>
 
 <style>
     .header {
     display: flex;
     align-items: center;
-    padding: 2rem;
+    padding: 2rem 2rem 0rem 5rem;
     max-width: 1200px;
-    padding-left: 5rem;
     cursor:default;
   }
   .panel {
     max-width: 1000px;
     margin: auto;
-    padding: 2rem;
     cursor:default;
   }
 
@@ -134,7 +131,7 @@
   }
 
   .tarjeta h4 {
-    margin-bottom: 0.5rem;
+    margin: 0rem;
   }
 
   .tarjeta p {

@@ -26,5 +26,11 @@ router.get('/top-tutores', verificarToken, authController.topTutores);
 router.get('/lista-tutorias', verificarToken, authController.listaTutorias);
 router.get('/estado-usuario', verificarToken, authController.estadoUsuario);
 router.post('/cambia-estado', verificarToken, authController.cambioEstadoUsuario);
+router.get('/datos-tutor', verificarToken, authController.datosTutor);
+router.get('/tutorias-en-espera', verificarToken, authController.listaTutoriasEnEspera);
+router.get('/tutorias-activas', verificarToken, authController.listaTutoriasAceptadas);
+router.post('/cambia-estado-reserva', verificarToken, authController.cambioEstadoReserva);
+router.get('/tutorias-finalizadas', verificarToken, authController.listaTutoriasFinalizadas);
+router.post('/calificar-estudiante', verificarToken, authController.calificaEstudiante);
 
 module.exports = router;
