@@ -63,8 +63,8 @@
       <img src="/single_logo.png" alt="Logo Mentoro" class="imagenlogo" />
     </div>
     <div class="user-info">
-      <span>Hola, <strong>tutor@mentoro.pa</strong></span>
-      <button>Cerrar sesión</button>
+      <span>Hola, <strong>{data.usuario.usuario}</strong></span>
+      <button on:click={cerrarSesion}>Cerrar sesión</button>
     </div>
     
   </div>
