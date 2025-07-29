@@ -434,6 +434,71 @@ async function calificarEstudiante(id_reserva, calificacion, comentario) {
   return resultado.rows;
 }
 
+async function verMateriasTutor(id_tutor) {
+  const resultado = await pool.query(
+    `SELECT 
+      m.id_materia,
+      m.de_materia
+    FROM Tutor_materia tm
+    JOIN Materia m ON tm.id_materia = m.id_materia
+    WHERE tm.id_tutor = $1
+    ORDER BY m.de_materia;
+    `,
+    [id_tutor]
+  );
+  return resultado.rows;
+}
+
+async function evaluarFechasReserva(id_tutor, id_materia, hora_inicio, hora_fin) {
+  const resultado = await pool.query(
+    `SELECT json_build_object(
+      'fechas_ocupadas', (
+        SELECT ARRAY_AGG(DISTINCT TO_CHAR(r.fe_reserva, 'YYYY-MM-DD') ORDER BY TO_CHAR(r.fe_reserva, 'YYYY-MM-DD'))
+        FROM Reserva r
+        WHERE r.id_tutor = $1
+          AND r.id_materia = $2
+          AND r.estado_reserva IN ('En espera', 'Aceptada')
+          AND r.hora_inicio < $4
+          AND r.hora_fin > $3
+      ),
+      'dias_no_disponibles', (
+        WITH dias_semana AS (
+          SELECT * FROM (VALUES
+            (0, 'Domingo'),
+            (1, 'Lunes'),
+            (2, 'Martes'),
+            (3, 'Miércoles'),
+            (4, 'Jueves'),
+            (5, 'Viernes'),
+            (6, 'Sábado')
+          ) AS dias(numero, nombre)
+        )
+        SELECT ARRAY_AGG(d.numero ORDER BY d.numero)
+        FROM dias_semana d
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM Disponibilidad disp
+          WHERE disp.id_tutor = $1
+            AND disp.dia_semana = d.nombre
+            AND disp.hora_inicio <= $3
+            AND disp.hora_fin >= $4
+        )
+      )
+    ) AS resultado;
+    `,
+    [id_tutor, id_materia, hora_inicio, hora_fin]
+  );
+  return resultado.rows;
+}
+
+async function realizarReserva(id_usuario, id_tutor, id_materia, fe_reserva, hora_inicio, hora_fin) {
+  const resultado = await pool.query(
+    `SELECT public.crear_reserva_con_validacion($1, $2, $3, $4, $5, $6)`,
+    [id_usuario, id_tutor, id_materia, fe_reserva, hora_inicio, hora_fin]
+  );
+  return resultado.rows[0];
+}
+
 module.exports = {
   registrarEstudiante,
   registrarTutor,
@@ -460,5 +525,8 @@ module.exports = {
   listarTutoriasAceptadas,
   cambiarEstadoReserva,
   listarTutoriasFinalizadas,
-  calificarEstudiante
+  calificarEstudiante,
+  verMateriasTutor,
+  evaluarFechasReserva,
+  realizarReserva
 };

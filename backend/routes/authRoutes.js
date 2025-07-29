@@ -32,5 +32,8 @@ router.get('/tutorias-activas', verificarToken, authController.listaTutoriasAcep
 router.post('/cambia-estado-reserva', verificarToken, authController.cambioEstadoReserva);
 router.get('/tutorias-finalizadas', verificarToken, authController.listaTutoriasFinalizadas);
 router.post('/calificar-estudiante', verificarToken, authController.calificaEstudiante);
+router.get('/ver-materias-tutor', verificarToken, authController.muestraMateriasTutor);
+router.get('/evaluar-fechas', authController.evaluaFechasReserva);
+router.post('/realizar-reserva', authController.realizaReserva);
 
 module.exports = router;

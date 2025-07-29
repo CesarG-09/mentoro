@@ -57,8 +57,6 @@
         <a href="/estudiante/inicio" class:active={esActiva('/estudiante/inicio')}>Home</a>
         <a href="/estudiante/buscador" class:active={esActiva('/estudiante/buscador')}>Buscador</a>
         <a href="/estudiante/mi_perfil" class:active={esActiva('/estudiante/mi_perfil')}>Mi Perfil</a>
-        <a href="/estudiante/reserva" class:active={esActiva('/estudiante/reserva')}>Reserva</a>
-
     </div>
     <div class="logo-container">
       <img src="/single_logo.png" alt="Logo Mentoro" class="imagenlogo" />

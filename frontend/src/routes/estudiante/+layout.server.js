@@ -16,20 +16,23 @@ export async function load({ locals, fetch }) {
 	};
 
     // Llamadas necesarias al cargar la página
-    const [topMateriasRes, topTutoresRes, tutoriasReservadasRes] = await Promise.all([
+    const [topMateriasRes, topTutoresRes, tutoriasReservadasRes, listaTutoresRes] = await Promise.all([
         fetch('http://localhost:3001/api/top-materias', { headers }),
 		fetch('http://localhost:3001/api/top-tutores', { headers }),
-		fetch(`http://localhost:3001/api/lista-tutorias?usuario=${encodeURIComponent(locals.usuario.usuario)}`, { headers })
+		fetch(`http://localhost:3001/api/lista-tutorias?usuario=${encodeURIComponent(locals.usuario.usuario)}`, { headers }),
+		fetch('http://localhost:3001/api/lista-tutores', { headers })
     ]);
 
     const topMateriasData = await topMateriasRes.json();
 	const topTutoresData = await topTutoresRes.json();
 	const tutoriasReservadasData = await tutoriasReservadasRes.json();
+	const listaTutoresData = await listaTutoresRes.json();
 
     return {
 		topMaterias: topMateriasData.materias || [],
 		topTutores: topTutoresData.tutores || [],
 		tutoriasReservadas: tutoriasReservadasData.tutorias || [],
+		listaTutores: listaTutoresData.tutores || [],
 		usuario: locals.usuario
 	};
 }

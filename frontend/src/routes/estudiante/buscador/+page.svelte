@@ -1,64 +1,66 @@
 <script>
-    /** @type {import('./$types').PageData} */
-    export let data;
-    import { goto } from '$app/navigation';
+  import { transformarTexto } from '../../../utils/transformarTexto'
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
 
-    let busqueda = '';
-    let resultados = [];
-    let mostrarPopup = false;
-    let tutorSeleccionado = null;
+  export let data;
+  
+  let busqueda = '';
+  let resultados = [];
+  let mostrarPopup = false;
+  let tutorSeleccionado = null;
 
-
-
-    // Simulado - deberías hacer fetch desde Supabase o tu backend
-    let todosLosTutores = [
-        {
-        id: 1,
-        nombre: 'Juan Pérez',
-        materias: ['Cálculo I', 'Álgebra'],
-        calificacion: 5,
-        foto: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
-        },
-        {
-        id: 2,
-        nombre: 'Laura Gómez',
-        materias: ['Química I'],
-        calificacion: 4,
-        foto: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
-        }
-    ];
-
-    let filtro = 'tutor'; // puede ser 'tutor' o 'materia'
-
-    function buscar() {
-    const texto = busqueda.toLowerCase();
-
-    resultados = todosLosTutores.filter(t => {
-        if (filtro === 'tutor') {
-        return t.nombre.toLowerCase().includes(texto);
-        } else {
-        return t.materias.some(m => m.toLowerCase().includes(texto));
-        }
+  let todosLosTutores = data.listaTutores
+    .map(m => ({ ...m, materias: transformarTexto(m.materias) }))
+    .map(item => ({...item, foto: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}))
+    .map(item => {
+      return {
+        ...item,
+        materias: item.materias.split(',').map(materia => materia.trim())
+      };
     });
-    }
 
-    function irADetalle(id) {
-        goto(`/tutor/${id}`);
-    }
+  let filtro = 'tutor'; // puede ser 'tutor' o 'materia'
 
-    function abrirPopup(tutor) {
-        tutorSeleccionado = tutor;
-        mostrarPopup = true;
+  onMount(() => {
+    if (sessionStorage.getItem('dato')) {
+      busqueda = sessionStorage.getItem('dato');
+      filtro = sessionStorage.getItem('filtro');
+      sessionStorage.clear();
     }
+	});
 
-    function cerrarPopup() {
-        mostrarPopup = false;
-    }
+  // Reacción a cambios en busqueda o filtro
+  $: {
+    const texto = busqueda.trim().toLowerCase(); // Asegúrate de eliminar espacios extra
 
-    function reservarTutoria() {
-        alert(`Reservando tutoría con ${tutorSeleccionado.nombre}`);
-        cerrarPopup();
-    }
+    // Filtrar los resultados dependiendo de la opción de filtro (tutor o materia)
+    resultados = todosLosTutores.filter(t => {
+      if (filtro === 'tutor') {
+        return t.nombre.toLowerCase().includes(texto);
+      } else {
+        return t.materias.some(m => m.toLowerCase().includes(texto));
+      }
+    });
+  }
+
+  function reservarTutor(id_tutor, nombre) {
+    goto(`/estudiante/reserva?id_tutor=${id_tutor}&nombre=${nombre}`);
+  }
+
+  function abrirPopup(tutor) {
+    tutorSeleccionado = tutor;
+    mostrarPopup = true;
+  }
+
+  function cerrarPopup() {
+    mostrarPopup = false;
+  }
+
+  function reservarTutoria() {
+    alert(`Reservando tutoría con ${tutorSeleccionado.nombre}`);
+    cerrarPopup();
+  }
 </script>
 
 <div class="buscador-container">
@@ -66,7 +68,7 @@
 
   <div class="dropdown-filtro">
     <label for="filtro">Filtrar por:</label>
-    <select id="filtro" bind:value={filtro} on:change={buscar}>
+    <select id="filtro" bind:value={filtro}>
       <option value="tutor">Tutor</option>
       <option value="materia">Materia</option>
     </select>
@@ -76,12 +78,13 @@
     type="text"
     placeholder="Escribe el nombre del tutor o una materia..."
     bind:value={busqueda}
-    on:input={buscar}
   />
 
   {#if resultados.length > 0}
     <div class="professor-container">
       {#each resultados as tutor}
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div class="professor-card" on:click={() => abrirPopup(tutor)}>
           <img src={tutor.foto} alt="Foto de tutor" />
           <div>
@@ -95,6 +98,8 @@
     </div>
 
     {#if mostrarPopup}
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
       <div class="popup-overlay" on:click|self={cerrarPopup}>
         <div class="popup-content">
             <h2>{tutorSeleccionado.nombre}</h2>
@@ -106,7 +111,7 @@
                 <span class="badge">{materia}</span>
             {/each}
             </div>
-          <button on:click={reservarTutoria}>Reservar tutoría</button>
+          <button on:click={() => reservarTutor(tutorSeleccionado.id_tutor, tutorSeleccionado.nombre)}>Reservar tutoría</button>
         </div>
       </div>
     {/if}
@@ -114,7 +119,6 @@
     <p>No se encontraron tutores para “{busqueda}”.</p>
   {/if}
 </div>
-
 
 <style>
   .buscador-container {

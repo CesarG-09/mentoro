@@ -26,7 +26,10 @@ const {
   listarTutoriasAceptadas,
   cambiarEstadoReserva,
   listarTutoriasFinalizadas,
-  calificarEstudiante
+  calificarEstudiante,
+  verMateriasTutor,
+  evaluarFechasReserva,
+  realizarReserva
 } = require('../models/usuarioModel');
 
 const registroEstudiante = async (req, res) => {
@@ -665,6 +668,95 @@ const calificaEstudiante = async (req, res) => {
   }
 };
 
+const muestraMateriasTutor = async (req, res) => {
+  try{
+    const id_tutor = req.query.id_tutor;
+    if (!id_tutor) {
+      return res.status(400).json({ error: 'El id_tutor es requerido' });
+    }
+
+    const resultado = await verMateriasTutor(id_tutor);
+    if (!resultado || resultado.length === 0) {
+			return res.status(404).json({ mensaje: 'No se encontró el tutor' });
+		}
+
+    return res.status(200).json({
+			mensaje: 'Tutor obtenido exitosamente',
+			tutor: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener tutor:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const evaluaFechasReserva = async (req, res) => {
+  try{
+    const { id_tutor, id_materia, hora_inicio, hora_fin } = req.query;
+    if (!id_tutor || !id_materia || !hora_inicio || !hora_fin) {
+      return res.status(400).json({ error: 'Todos los parámetros son requeridos' });
+    }
+
+    const resultado = await evaluarFechasReserva(id_tutor, id_materia, hora_inicio, hora_fin);
+
+    return res.status(200).json({
+			mensaje: 'Tutor obtenido exitosamente',
+			fechas_ocupadas: resultado
+		});
+  } catch (error) {
+    console.error('Error al obtener tutor:', error);
+		res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+const realizaReserva = async (req, res) => {
+  try {
+    const { id_usuario, id_tutor, id_materia, fe_reserva, hora_inicio, hora_fin } = req.body;
+
+    if (!id_usuario || !id_tutor || !id_materia || !fe_reserva || !hora_inicio || !hora_fin) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+
+    const resultado = await realizarReserva(id_usuario, id_tutor, id_materia, fe_reserva, hora_inicio, hora_fin);
+    
+    if (resultado.crear_reserva_con_validacion === 'ESTUDIANTE_NO_ENCONTRADO') {
+      return res.status(400).json({ mensaje: 'Estudiante no encontrado.' });
+    }
+
+    if (resultado.crear_reserva_con_validacion === 'TUTOR NO ENCONTRADO') {
+      return res.status(400).json({ mensaje: 'Tutor no encontrado.' });
+    }
+
+    if (resultado.crear_reserva_con_validacion === 'MATERIA_NO_ASIGNADA_AL_TUTOR') {
+      return res.status(400).json({ mensaje: 'Materia no asignada al tutor.' });
+    }
+
+    if (resultado.crear_reserva_con_validacion === 'TUTOR_NO_DISPONIBLE_DIAS') {
+      return res.status(400).json({ mensaje: 'Tutor no disponible en ese dia.' });
+    }
+
+    if (resultado.crear_reserva_con_validacion === 'TUTOR_NO_DISPONIBLE_HORAS') {
+      return res.status(400).json({ mensaje: 'Tutor no disponible en esas horas.' });
+    }
+
+    if (resultado.crear_reserva_con_validacion === 'TUTOR_NO_DISPONIBLE_RESERVA') {
+      return res.status(400).json({ mensaje: 'Tutor no disponible para reserva.' });
+    }
+
+    if (resultado.crear_reserva_con_validacion === 'RESERVA_REALIZADA') {
+      return res.status(200).json({
+        mensaje: 'Estado cambiado exitosamente',
+        resultado: resultado
+      });
+    } else {
+      return res.status(400).json({ mensaje: 'Error desconocido!' });
+    }
+  } catch (error) {
+    console.error('Error al cambiar el estado:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+};
+
 module.exports = {
   registroEstudiante,
   registroTutor,
@@ -691,5 +783,8 @@ module.exports = {
   listaTutoriasAceptadas,
   cambioEstadoReserva,
   listaTutoriasFinalizadas,
-  calificaEstudiante
+  calificaEstudiante,
+  muestraMateriasTutor,
+  evaluaFechasReserva,
+  realizaReserva
 };

@@ -1,12 +1,25 @@
 
 <script>
     import { transformarTexto } from '../../../utils/transformarTexto';
+    import { goto } from '$app/navigation';
     export let data;
     let materias = data.topMaterias.map(m => ({ ...m, materia: transformarTexto(m.materia) }));
 
     let tutores = data.topTutores.map(m => ({ ...m, materias: transformarTexto(m.materias) }));
 
     let tutorias = data.tutoriasReservadas.map(m => ({ ...m, materia: transformarTexto(m.materia) }));
+
+    function buscarTutor(tutor) {
+        sessionStorage.setItem('dato', tutor);
+        sessionStorage.setItem('filtro', 'tutor');
+        goto(`/estudiante/buscador`);
+    }
+
+    function buscarMateria(materia) {
+        sessionStorage.setItem('dato', materia);
+        sessionStorage.setItem('filtro', 'materia');
+        goto(`/estudiante/buscador`);
+    }
 </script>
 
 <!-- Materias en tendencia -->
@@ -19,7 +32,7 @@
                     <h2>{materia.materia}</h2>
                     <img src="https://cdn-icons-png.flaticon.com/512/10782/10782050.png" alt="Imagen Materia" class="card-image">
                     <p>{materia.descripcion}</p>
-                    <button>Buscar esta materia</button>
+                    <button on:click={() => buscarMateria(materia.materia)}>Buscar esta materia</button>
                 </div>
             {/each}
         {/if}
@@ -41,7 +54,7 @@
                         <h3>{tutor.nombre}</h3>
                         <p>{tutor.materias}</p>
                         <p>{#each Array(tutor.calificacion) as _}⭐{/each}</p>
-                        <button>Reservar</button>
+                        <button on:click={() => buscarTutor(tutor.nombre)}>Buscar este tutor</button>
                     </div>
                 </div>
             {/each}
